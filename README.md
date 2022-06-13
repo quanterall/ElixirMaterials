@@ -10,10 +10,16 @@ If you are a beginner this is a good place to start learning Elixir
   - [Understanding the type system](#understanding-the-type-system)
     - [Atoms](#atoms)
     - [Tuples](#tuples)
+    - [Lists](#lists)
+    - [Maps](#maps)
+    - [Keyword List](#keyword-list)
+    - [Range](#range)
+  - [First-class functions](#first-class-functions)
   - [Modules](#modules)
   - [Functions](#functions)
   - [Chaining functions](#chaining-functions)
   - [If expressions](#if-expressions)
+  - [Unless expression](#unless-expression)
   - [Cond expressions](#cond-expressions)
   - [Case expression](#case-expression)
 
@@ -89,7 +95,7 @@ When you pass the variable `a` to a function you are not passing the reference t
 
 ## Understanding the type system
 
-This section is not going to go through all types but rather point one the interesting ones and how Elixir goes about them.
+As we mentioned before Elixir's type system is dynamic, meaning that when we are creating variables and function we don't need to specify types. Types are automatically inferred from the value that you bind them to. Variables can change types as well. You can assign a variable to a string and then to a number on the next line. This is usually not a good idea because it just brings confusion and opens a door for potential bugs, yet the language allows it, so keep that in mind. Elixir has most of the types that you probably are familiar with and a few that might be new to you. Some have quirks and this section is going to showcase the potential new types you might encounter and some of the ones that you are familiar with but have some quirks in Elixir.
 
 ### Atoms
 
@@ -126,6 +132,203 @@ To pull elements from a tuple we could use `Kernel.elem/2` or `elem/2`, where th
 iex(2)> elem(person, 0)
 "Bob" 
 ```
+
+### Lists
+List is type that you might be very familiar with, but in Elixir it has some quirks that are good to know.
+Lists in Elixir are implemented as linked lists. What that means is that the elements are not stored together in the memory, but rather every element is has a pointer to the memory where the next is stored. `[elem1 | rest -> [elem2 | rest -> [elem3 | rest -> []]]]`. Because of that adding elements to the beginning of lists in Elixir is a faster than adding it to the end of the list _(Adding an element at the end means that Elixir has to traverse the whole list so that it find where the end. In contract adding to the beginning is just as easy as pointing the next element to the current list.)_
+
+Adding an element to the end of a list
+```elixir
+iex(1)> list = [1, 2, 3]
+[1, 2, 3]
+iex(2)> list ++ [4]
+[1, 2, 3, 4]
+```
+Adding an element at the end of a list is done by concatenating another list with a single element. For the concatenation we are using `++`. Here Elixir is traversing the `list` variable to find where the end of the list is in order to attach the new list. This is an `O(n)` operation. This means that depending on how many elements there are in the list, the slower the operation becomes.
+
+Adding an element to the beginning
+```elixir
+iex(1)> list = [1, 2, 3]
+[1, 2, 3]
+iex(2)> [0 | list]
+[0, 1, 2, 3]
+```
+Here we are using the `|` symbol for attaching a new `"head"` to the list. Here Elixir is creating a list where the head is '0' and a pointer to the rest of the list pointing to where '[1, 2, 3]' is stored in memory. This is an `O(1)` operation. This means that no matter how many elements are present in the list, the performance is constant. _("head" is called the first element of a list, where as "tail" is the rest of the list. For the list [0, 1, 2, 3], '0' is the "head" and '[1, 2, 3]' is the "tail")_
+
+Let's represent the previous example with `head` and `tail`:
+```elixir
+iex(1)> head = 0
+0
+iex(2)> tail = [1, 2, 3]
+[1, 2, 3]
+iex(3)> [head | tail]
+[0, 1, 2, 3]
+```
+
+We can use `hd` and `tl` to pull `head` / `tail` respectively from a list:
+```elixir
+iex(1)> hd([1, 2, 3])
+1
+iex(2)> tl([1, 2, 3])
+[2, 3]
+```
+Both operations are `O(1)`, because they amount to reading one or the other value from the (head, tail) pair.
+
+### Maps
+
+As you probably know maps are a structure which is a key/value based, where a key points to a value. Keys in Maps are indexed, meaning that you have direct access _O(1) operation_ to a value. They are mainly used for structuring data and information. Think of it like a tuple where you actually have a key for the values.
+
+Maps in Elixir are not that different from the ones in other languages. Here you'll see how they are written and some little quirks about them.
+
+The following snippet demonstrates how to create a map.
+```elixir
+iex(1)> person = %{:name => "Georgi", :age => 27}
+%{name: "Georgi", age: 27}
+```
+What you'll notice is that on the next line our map looks a little bit different, instead of the fat arrows `=>` it has a colon `:` and the colon of the atom is gone. This is just a syntax sugar for visualizing maps when all of the keys are atoms. If there is even one key which is not an atom, this won't be the case.
+
+```elixir
+iex(1)> person = %{:name => "Georgi", :age => 27, "works_at" => "Quanterall"}
+%{:name => "Georgi", :age => 27, "works_at" => "Quanterall"}
+```
+
+When you are only using atoms you can actually write the map using the short syntax
+```elixir
+iex(1)> person = %{name: "Georgi", age: 27}
+%{name: "Georgi", age: 27}
+```
+
+To retrieve a field from a map you can use the access operator `[]`
+```elixir
+iex(1)> person = %{name: "Georgi", age: 27}
+%{name: "Georgi", age: 27}
+iex(2)> person[:name]
+"Georgi"
+iex(3)> person[:non_existing_field]
+nil
+```
+
+If you are accessing fields which keys are atoms you can access field with the `.` operator
+```elixir
+iex(1)> person = %{name: "Georgi", age: 27}
+%{name: "Georgi", age: 27}
+iex(2)> person.name
+"Georgi"
+iex(3)> person.non_existing_field
+** (KeyError) key :b not found in: %{:a => 1, "b" => 2}
+```
+
+**NB** _Note that when you are accessing field with the `.` operator if the key is missing from the map, this throws an exception, where as using the `[]` operator you get `nil`_
+
+Modifying values in Map can be done either with a function from the `Map` module or by using the syntax for updating a Map
+```elixir
+iex(1)> person = %{name: "Georgi", age: 27}
+%{name: "Georgi", age: 27}
+iex(2)> %{person | age: 28}
+%{name: "Georgi", age: 28}
+iex(3)> person
+%{name: "Georgi", age: 27}
+iex(4)> %{person | non_existing_key: 1}
+** (KeyError) key :non_existing_key not found in: %{age: 27, name: "Georgi"}
+    (stdlib 3.16.1) :maps.update(:non_existing_key, 1, %{age: 27, name: "Georgi"})
+    (stdlib 3.16.1) erl_eval.erl:256: anonymous fn/2 in :erl_eval.expr/5
+    (stdlib 3.16.1) lists.erl:1267: :lists.foldl/3
+```
+**NB** _Notice that we are not updating value bound to the `person` variable. This update syntax is an expression, so it returns a result._
+
+If you want to update the `person` variable to the result of the update Map you have to rebind the variable.
+
+```elixir
+iex(1)> person = %{name: "Georgi", age: 27}
+%{name: "Georgi", age: 27}
+iex(2)> person = %{person | age: 28}
+%{name: "Georgi", age: 28}
+iex(3)> person
+%{name: "Georgi", age: 28}
+```
+
+### Keyword List
+A keyword list is a special type of list where each element is a tuple of 2 elements and the first element of each tuple is an atom. The second element can be of any type.
+```elixir
+iex(1)> [{:monday, 1}, {:tuesday, 2}, {:wednesday: 3}]
+```
+
+Elixir allows a nicer way of writing this.
+```elixir
+iex(1)> [monday: 1, tuesday: 2, wednesday: 3]
+```
+Both structures yield the same result, just the syntax is different. If you map on a keyword list each element will be a tuple. 
+
+**NB** _Don't forget that you are dealing with a list here. The lookup operation is still an O(n) operation._
+
+### Range
+A range is an abstraction that allows you to represent a range of numbers. Elixir provides a special syntax for defining ranges.
+```elixir
+iex(1)> 1..3
+1..3
+```
+It looks kind of strange. So can we work with ranges? Well ranges are treated enumerable, therefore you can use it with all functions from the `Enum` module. You can even create a list of the range.
+```elixir
+iex(1)> Enum.to_list(1..3)
+[1, 2, 3]
+iex(2)> Enum.map(1..3, fn v -> v + 1 end)
+[2, 3, 4]
+```
+As you can see, after going through the `Enum.map` function the range has converted to a list. Keep in mind that _range_ is not a separate type in Elixir, it's just representation of a range of numbers. 
+
+**NB** _Ranges are really small in footprint, so even a million number range will be small_
+
+## First-class functions
+In Elixir a function is a first-class citizen, which means that it can be bound to a variable, which won't execute it, but it will bind the function definition instead, so you can use the variable now to call the function. 
+
+Let's see how this looks in actions
+```elixir
+iex(1) square = fn v -> v * v end
+#Function<44.65746770/1 in :erl_eval.expr/5>
+iex(2) square.(5)
+25
+```
+Calling the function might look a little weird because we have to put a dot between the variable name and the brackets. The reason why the dot is there is to differentiate an anonymous function from a regular one. This way, when you see how a function is called you'll immediately know whether it's anonymous or not.
+
+If the function doesn't take any arguments nothing much will change
+```elixir
+iex(1)> returns_5 = fn -> 5 end
+#Function<45.65746770/0 in :erl_eval.expr/5>
+iex(2)> returns_5.()
+5
+```
+
+Because functions can be bound to a variable they can be passed as a parameter to other functions.
+
+```elixir
+iex(1) square = fn v -> v * v end
+#Function<44.65746770/1 in :erl_eval.expr/5>
+iex(2) Enum.map(1..3, square)
+[1, 4, 9]
+```
+
+Bare in mind that when you pass some function instead of typing out the required anonymous function you have consider how many parameters is the anonymous function requiring. If you pass more or less than it should have it will crash, because it cannot invoke your function.
+
+```elixir
+iex(1)> times = fn (v, t) -> v * t end
+#Function<44.65746770/1 in :erl_eval.expr/5>
+iex(2)> Enum.map(1..3, times)
+** (BadArityError) #Function<43.65746770/2 in :erl_eval.expr/5> with arity 2 called with 1 argument (1)
+    (elixir 1.13.3) lib/enum.ex:1597: anonymous fn/3 in Enum.map/2
+    (elixir 1.13.3) lib/enum.ex:4136: Enum.reduce_range/5
+    (elixir 1.13.3) lib/enum.ex:2400: Enum.map/2
+```
+
+Elixir has a special _capture_ operator `&` which is used if you want to reference a regular _(non lambda)_ function. It has a special syntax that you have to follow in order to use it. That syntax is: `&Mod.fun/arity` where `Mod` is the module name, `fun` is the function name and `arity` is the amount of argument that this function is taking. The module name can be omitted though `&fun/arity`
+```elixir
+iex(1)> Enum.map(1..3, fn v -> to_string(v) end)
+["1", "2", "3"]
+iex(2)> Enum.map(1..3, &Kernel.to_string/1)
+["1", "2", "3"]
+iex(3)> Enum.map(1..3, &to_string/1)
+["1", "2", "3"]
+```
+
 
 ## Modules
 
@@ -218,9 +421,30 @@ end
 
 In this example, we are binding the variable `this_value_might_be_nil` to the result of the `if`, but since the `if` doesn't have an `else` case, when the `language` that is passed is not "spanish" the result will be `nil`.
 
+Bare in mind that this is the same as doing. You don't need the variable in the upper example.
+```elixir
+def hello(language) do
+  if (language == "spanish") do
+    "hola"
+  end
+end
+```
+
+## Unless expression
+The _unless_ expression is basically an opposite `if`, where the negative statement goes first and then the positive.
+```elixir
+def hello(language) do
+  unless language == "english" do
+    "hola"
+  else 
+    "hello"
+  end
+end
+```
+Don't overuse the _unless_ expression though. Whenever it makes sense go for it, but otherwise don't try to use it where an _if_ makes more sense for reading the code.
 
 ## Cond expressions
-Cond is the expression you are looking for the cases where you need an `else if` branch. In `cond` you can have as many conditions as you'll like and usually ends with a default case. _(similar to how switch works in other languages)_
+The _cond_ expression is what you are looking for the cases where you need an `else if` branch. In `cond` you can have as many conditions as you'll like and usually ends with a default case. _(similar to how switch works in other languages)_
 
 ```elixir
 def hello(language, name) do
@@ -236,4 +460,4 @@ end
 
 ## Case expression
 
-Case 
+**TBA**
