@@ -386,6 +386,83 @@ end
 Parenthesis can be omitted when the function does not accept parameters. The amount of parameters a function accepts is called `arity`.
 When referring to the function `add` it would be like so: `MyFirstModule.add/2` or `add/2` where the `2` is pointing to the `arity`.
 
+A function can be set as _private_ by defining it with `defp` instead of `def`. This means that this function cannot be used outside the scope of the Module in which is defined.
+
+## Guards
+Guards are a way to provide additional binary checks to your function. Not all expressions are allowed in guard clauses. Yet they can be very helpful to _guard_ your function from being called.
+
+This might sound confusing, so let's see an example:
+
+```elixir
+# If we pass an odd number the guard will fail, therefore
+# Elixir will attempt the next function in line.
+def even?(num) when rem(num, 2) do
+  :even
+end
+
+def even?(_) do
+  :odd
+end
+```
+As you can notice guards are added using the `when` clause, just before the `do`
+
+You can have multiple guards using `and` and `or`, the same way you can do in an `if` statement.
+```elixir
+def even?(num) when num > 10 and rem(num, 2) do
+  :even
+end
+
+def even?(_) do
+  :odd
+end
+```
+
+### Where can guards be used?
+They can be used in variety of constructs. Such like `case`, `for`, `with` etc.
+You can used them in lambda functions as well. 
+
+Guards in a lambda function
+```elixir
+iex(1)> my_fun = fn 
+...(1)> num when num < 10 -> "Less than 10"
+...(1)> num when num >= 10 and num <= 99 -> "Between 10 and 99"
+...(1)> num when num >= 100 and num < 999 -> "Between 100 and 999"
+...(1)> _ -> "More than 1000"
+...(1)>end
+```
+
+Guards in a case expression
+```elixir
+case number do
+  num when num < 10 -> "Less than 10"
+  num when num >= 10 and num <= 99 -> "Between 10 and 99"
+  num when num >= 100 and num < 999 -> "Between 100 and 999"
+  _ -> "More than 1000"
+end
+```
+
+### Defining your own guards
+You might find yourself using the same multiple guards in multiple functions. To alleviate this issue you can create your own custom guard that will combine these checks in one single guard.
+
+```elixir
+defmodule MyModule do
+  def my_function(number) when is_integer(number) and rem(number, 2) == 0 do
+    # do stuff
+  end
+end
+```
+Instead of having these 2 guards, we can combine the checks in a custom guard and use it instead
+
+```elixir
+defmodule MyModule do
+  defguard is_even(value) when is_integer(value) and rem(value, 2) == 0
+
+  def my_function(value) when is_even(value) do
+    # do stuff
+  end
+end
+```
+
 ## Chaining functions
 Elixir has the Pipe `|>` operator which can change functions together, which makes reading function composition so much easier.
 
