@@ -329,6 +329,22 @@ iex(3)> Enum.map(1..3, &to_string/1)
 ["1", "2", "3"]
 ```
 
+Similar to named functions, anonymous function can have multiple bodies, where the body is chosen based on pattern matching
+```elixir
+iex(1)> my_fun = fn
+...(1)> [] -> "empty list"
+...(1)> [_] -> "list with 1 element"
+...(1)> [_ | _] -> "list with at least 1 element"
+...(1)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(2)> my_fun([])
+"empty list"
+iex(3)> my_fun([1])
+"list with 1 element"
+iex(4)> my_fun([1, 2])
+"list with at least 1 element"
+```
+
 
 ## Modules
 
