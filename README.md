@@ -50,7 +50,6 @@ For example:
 ```elixir
 iex(1)> 1 + 1
 2
-iex(2)
 ```
 
 With some explanations:
@@ -64,12 +63,42 @@ iex(2) <-- The shell immediately gives us the next row to enter a new expression
 
 You don't need to write everything on one line in the shell. The shell is smart to understand that if you hit Enter and the expression is not finished it will continue on the same row.
 ```elixir
-iex(2)> 1 +
-...(2)> 1 +
-...(2)> 1 +
-...(2)> 2
+iex(1)> 1 +
+...(1)> 1 +
+...(1)> 1 +
+...(1)> 2
 5
-iex(3)>
+```
+
+In the `iex shell` you can see the documentation of every function by just calling `h` in front of the function for which you want to see the docs (if there are any).
+```elixir
+iex(1)> h Enum.at
+
+                def at(enumerable, index, default \\ nil)                 
+
+  @spec at(t(), index(), default()) :: element() | default()
+
+Finds the element at the given index (zero-based).
+
+Returns default if index is out of bounds.
+
+A negative index can be passed, which means the enumerable is enumerated
+once and the index is counted from the end (for example, -1 finds the
+last element).
+
+## Examples
+
+    iex> Enum.at([2, 4, 6], 0)
+    2
+    
+    iex> Enum.at([2, 4, 6], 2)
+    6
+    
+    iex> Enum.at([2, 4, 6], 4)
+    nil
+    
+    iex> Enum.at([2, 4, 6], 4, :none)
+    :none
 ```
 
 ## Working with variables
