@@ -295,19 +295,74 @@ Both structures yield the same result, just the syntax is different. If you map 
 **NB** _Don't forget that you are dealing with a list here. The lookup operation is still an O(n) operation._
 
 ### Range
-A range is an abstraction that allows you to represent a range of numbers. Elixir provides a special syntax for defining ranges.
+A range is an abstraction that allows you to represent a sequence of zero, one or many, ascending or descending integers. Ranges are always inclusive and they may have a custom step.
 ```elixir
 iex(1)> 1..3
 1..3
 ```
-It looks kind of strange. So can we work with ranges? Well ranges are treated enumerable, therefore you can use it with all functions from the `Enum` module. You can even create a list of the range.
+It looks kind of strange. When we type it out, the result is exactly what we wrote. So can we work with ranges? Well ranges are treated as an enumerable, therefore you can use it with all functions from the `Enum` module. You can even create a list of the range.
 ```elixir
 iex(1)> Enum.to_list(1..3)
 [1, 2, 3]
 iex(2)> Enum.map(1..3, fn v -> v + 1 end)
 [2, 3, 4]
 ```
-As you can see, after going through the `Enum.map` function the range has converted to a list. Keep in mind that _range_ is not a separate type in Elixir, it's just representation of a range of numbers. 
+As you can see, after going through the `Enum.map` function the range has converted to a list. Keep in mind that _range_ is not a separate type in Elixir, it's just representation of a range of numbers.
+
+You can have a range with a custom step as well
+```elixir
+iex(1)> Enum.to_list(1..10//2)
+[1, 3, 5, 7, 9]
+iex(2)> Enum.to_list(20..100//20)
+[20, 40, 60, 80, 100]
+```
+
+You can have a negative step as well
+```elixir
+iex(1)> Enum.to_list(100..10//-20)
+[100, 80, 60, 40, 20]
+```
+
+Internally ranges are represented as structs
+```elixir
+iex(1)> range = 10..100//20
+10..100//20
+iex(2)> range.first
+10
+iex(3)> range.last
+100
+iex(4)> range.step
+20
+```
+Or you could just pattern match the structure like so
+```elixir
+iex(1)> range = 10..100//20
+10..100//20
+iex(2)> first..last//step = range
+10..100//20
+iex(3)> first
+10
+iex(4)> last
+100
+iex(5)> step
+20
+```
+
+Useful to know is that there is a `Range` module and we can use it to construct a range or get it's size through the `Range.size/1` function.
+```elixir
+iex(1)> range = Range.new(2, 10, 2)
+2..10//2
+iex(2)> Range.size(range)
+5
+iex(3)> Range.size(Range.new(1, 1_000_000))
+1000000
+```
+
+Although since `Range` is implemented as an Enumerable, you could just as well call `Enum.count` to get the size
+```elixir
+iex(1)> Enum.count(Range.new(1, 1_000_000))
+1000000
+```
 
 **NB** _Ranges are really small in footprint, so even a million number range will be small_
 
