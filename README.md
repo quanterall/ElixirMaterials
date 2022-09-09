@@ -26,6 +26,9 @@ If you are a beginner this is a good place to start learning Elixir
   - [Cond expressions](#cond-expressions)
   - [Case expressions](#case-expressions)
   - [With expression](#with-expression)
+  - [Concurrency](#concurrency)
+    - [Creating a process](#creating-a-process)
+    - [Message passing](#message-passing)
 
 ## Work In Progress
 
@@ -776,4 +779,132 @@ else
   error_pattern2 ->
     # some error
 end
+```
+
+## Concurrency
+This section is about the primitives that Elixir/Erlang exposes for dealing with processes. In Elixir processes are really light weight. It takes only a couple of microseconds to create a single process and its initial memory footprint is a few kilobytes. For that reason Elixir/Erlang are famous for starting millions of processes without much of a sweat. (_The theoretical limit imposed by the BEAM VM is 134 million_).
+
+_In BEAM a process is a concurrent thread of execution. Two processes run concurrently and may even run in parallel of at least two CPU cores are available. BEAM processes are handled by the VM, which uses it's own scheduler to manage their concurrent execution. By default BEAM uses as many schedulers as there are CPU cores available. For example, if you have 4 core machine, it will start 4 schedulers. A scheduler is in charge of the interchangeable execution of the processes. Meaning that the scheduler is responsible for making sure that each process get its fare share of execution time. When the time slot which has been granted for a process is over, the running process is  and the next one takes over. That principle is then repeated for each process until all of them finish their execution. Because of the way the BEAM schedulers work, there isn't a possibility for a process to hang the whole VM, because when it's time is up, it will be preempted and the next process will get some execution time. Meaning, one bad process cannot ruin a whole system._
+
+BEAM processes are completely isolated. They don't share memory or state and a crash of one process does not affect the rest that are running. Each process handles it's own state and when a process dies the state dies with it. Because of this isolation in order for the processes to communicate with each other they send messages between themselves. 
+
+
+### Creating a process
+In order to create a simple process we can use the `Kernel.spawn/1` function which takes a function with 0 arguments. The function that you pass to `Kernel.spawn/1` is the one that will be executed in a separate process (i.e the process that is started by the `Kernel.spawn/1` function). That process is short lived and as soon as the execution of the function that you passed is over, the process will die.
+
+```elixir
+iex(1)> spawn(fn -> IO.inspect("hello world") end)
+#PID<0.109.0>
+"hello world"
+```
+The returned value of the `Kernel.spawn/1` function is this _#PID<0.109.0>_ which is called `pid` or (process id). The `pid` is basically an address that points to a specific process. Used as a way to reference a process.
+
+We can check that the process has died using the `Process.alive?/1` function, but we have to take a hold on the pid that is returned by the `Kernel.spawn/1` function
+```elixir
+iex(1)> pid = spawn(fn -> IO.inspect("hello world") end)
+#PID<0.109.0>
+"hello world"
+iex(2)> Process.alive?(pid)
+false
+```
+
+For a more concrete example let's say simulate a function that take some time to execute. (_We can simulate this via the `Process.sleep/1` function_)
+```elixir
+iex(1)> long_task = fn id ->
+...(1)>   Process.sleep(2_000)
+...(1)>   "#{id} has finished"
+...(1)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+```
+
+When we execute the function it takes it 2 seconds to return the result (_which is what we are expecting_)
+```elixir
+iex(2)> long_task.(1)
+"1 has finished"
+```
+
+If we decide to run multiple of these what we'll see is that the first one has to finish in order for the second to start executing and so forth. When we execute the following code it takes it 10 seconds to return the result (_Again this makes absolute sense since we started 5 tasks where each one takes 2 seconds to finish_).
+```elixir
+iex(3)> Enum.map(1..5, fn id -> long_task.(id) end)
+["1 has finished", "2 has finished", "3 has finished",
+ "4 has finished", "5 has finished"]
+```
+
+So let's create an function that would run this long task in a separate process. (_Here we are using `IO.inspect/1` in order to get the result printed in the terminal. Later we'll look into how processes can send information between each other._) 
+```elixir
+iex(4)> async_long_task = fn id ->
+...(4)>   spawn(fn -> IO.inspect(long_task.(id)) end)
+...(4)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(5)> async_long_task.(1)
+#PID<0.133.0>
+"1 has finished"
+```
+Here it takes us again 2 seconds in order to get the result printed on the screen. Which at this point is no different than the synchronous long task, but let's see what happens when we call multiple of these.
+```elixir
+iex(5)> Enum.map(1..5, fn id -> async_long_task.(id) end)
+[#PID<0.123.0>, #PID<0.124.0>, #PID<0.125.0>, #PID<0.126.0>,
+ #PID<0.127.0>]
+"1 has finished"
+"2 has finished"
+"3 has finished"
+"4 has finished"
+"5 has finished"
+```
+
+This only took 2 seconds to complete. This is because we started 5 processes which wre running concurrently and therefore finishing at the same time. As we stated earlier processes are completely isolated and independent of each other. We don't get access to the results that were produced by the processes which works perfectly fine when we don't care about them.
+
+
+### Message passing
+As we have already mentioned, processes are completely isolated from each other and don't share memory. In Elixir processes communicate via messages. In order for process A to make process B do something, it needs to send a message. Each process has a so called `mailbox`. When process A send a message to process B, a new message appears in the `mailbox` of process B. Processes can read messages from their `mailboxes` at any time. Messages are of type `term`, meaning you can send any type of data. Because processes can't share memory, a message is deep-copied when it's sent. This is done so that process A may die at any point in time, even if process B hasn't yet read the message from the `mailbox`. The process `mailbox` is a FIFO queue limited only by the available memory. When processes read messages from the queue, they are consumed in order of arrival.
+
+**NB:** A message can only be removed from the `mailbox` (_the queue_) by consuming it. There is no way to unsent a message or delate a message from the `mailbox`.
+
+Sending a message to a process is done using the `Kernel.send/2` function.
+```elixir
+iex(1)> terminal_pid = self()
+#PID<0.107.0>
+iex(2)> spawn(fn -> send(terminal_pid, "Hello from #{inspect(self())}") end)
+#PID<0.139.0>
+```
+
+There are a few things to unwrap in this example. First we used `Kernel.send/0` function in order to obtain the pid of the shell (_Keep in mind that the terminal is a process on it's own_). We need that pid, because we want to send a message from a brand new process to the process of the shell. Then we spawn a new process and inside it's function we call `send/2` where we specify that the receiver of the message is the `terminal_pid` and we want to send a message `Hello from {pid_of_the_caller}`. As you may notice, inside the function we again call `self/0` but this time this call will yield the pid of the spawned process (in our case that is `#PID<0.139.0>`, as we can see from the result of the `spawn/1` function). Once this is called, the shell process receives a new message in it's `mailbox`.
+
+In order to receive a message from the `mailbox` of a process we need to use the `receive do` block. Which as the name implies is used to receive messages.
+
+```elixir
+iex(3)> receive do
+...(3)>   message -> "Received message: #{message}"
+...(3)> end
+"Received message: Hello from #PID<0.139.0>"
+```
+
+The `receive do` block works almost the same way as the `case do` block. We can implement multiple pattern matches in order to handle various types of incoming messages. In our case we'll do a simple _match all_ pattern and just return a string with the message.
+
+```elixir
+iex(4)> spawn(fn -> send(terminal_pid, {:message, "Hello World", self()}) end)
+#PID<0.160.0>
+iex(3)> receive do
+...(3)>   {:message, message, sender} -> "Received message from [#{inspect(sender)}]: #{message}"
+...(3)> end
+"Received message from [#PID<0.162.0>]: Hello World"
+```
+
+If there are no message left in the `mailbox` of a process the `receive do` block will wait indefinitely for a new message to arrive. This means that the process in which you called the `receive do` block will hang (_until a new message arrives_).
+
+```elixir
+iex(1)> receive do
+...(1)>   message -> message
+...(1)> end # <---- Here the shell will hang if there are no messages left in the mailbox
+```
+
+In order to overcome this problem we can attach a time frame to the `receive do` block. After that time has passed it can do something else.
+
+```elixir
+iex(1)> receive do
+iex(1)>   message -> message
+iex(1)> after
+iex(1)>   5_000 -> "Mailbox is empty"
+iex(1)> end # <--- Result will be visible after 5 seconds, the mailbox of the shell process is empty
+"Mailbox is empty"
 ```
