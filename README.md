@@ -908,3 +908,108 @@ iex(1)>   5_000 -> "Mailbox is empty"
 iex(1)> end # <--- Result will be visible after 5 seconds, the mailbox of the shell process is empty
 "Mailbox is empty"
 ```
+
+The `receive do` block reads only one message at a time. It was already mentioned that messages in the process `mailbox` are stored in a queue. But this doesn't mean that you are supposed to consume them in that order. When `receive do` is trying to read messages from the queue, it will play them in their order through the patten match that was specified. If the first message passes the pattern match, that message will be read. If it doesn't match `receive do` will try with the next one and so forth until it either finds a message that passes or reaches the end. If there is an `after` block when it reaches the end, it will execute the code inside it.
+
+Let's see how this works out
+```elixir
+iex(1)> shell_pid = self()
+#PID<0.107.0>
+iex(2)> spawn(fn -> send(shell_pid, "first message") end)
+#PID<0.110.0>
+iex(3)> spawn(fn -> send(shell_pid, {:msg, "second message"}) end)
+#PID<0.112.0>
+iex(4)> receive do
+...(4)>   {:msg, msg} -> msg
+...(4)> end
+"second message"
+```
+
+As you can see we read the second message in the queue, because the first one didn't match the pattern in the `receive do` block. The first message is still unhandled, so it remains in the `mailbox` waiting to be processed. We can read it if we do a "catch all" pattern match.
+
+```elixir
+iex(5)> receive do
+...(5)>   msg -> msg
+...(5)> end
+"first message"
+```
+
+**NB** Messages keep their order in the queue, even if they don't match the specified pattern. They will always be executed in order, yet the message that will be read is the first one that matched the given pattern. Messages remain in the `mailbox` until they are processed or the process dies.
+
+Now we can change the code we did for `async_long_task` to actually send the response back to the caller.
+```elixir
+iex(1)> long_task = fn id ->
+...(1)>   Process.sleep(2_000)
+...(1)>   "#{id} has finished"
+...(1)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(2)> async_long_task = fn id -> 
+...(2)>   caller = self() # <- Here we are taking the pid of the 'caller', which in our case is the shell
+...(2)>   spawn(fn -> send(caller, {:result, long_task.(id)}) end)
+...(2)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(3)> Enum.each(1..5, fn num -> async_long_task.(num) end) # <- Here we are calling `async_long_task/1` 5 times
+:ok # <- This means that all the tasks have been called and now we can start consuming the results
+iex(4)> reader = fn -> # <- We'll do a utility function that calls `receive do` for ease of use
+...(4)>   receive do
+...(4)>     {:result, data} -> data
+...(4)>   end
+...(4)> end
+#Function<43.3316493/0 in :erl_eval.expr/6>
+iex(5)> Enum.map(1..5, fn _ -> reader.() end) # <- We can use `Enum.map` here to read the results
+["1 has finished", "2 has finished", "3 has finished",
+ "4 has finished", "5 has finished"]
+```
+
+**NB** An important note to be made is that `self/0` returns the pid of the process in which it is called. So make sure you are calling it in the correct process. In the example above we had to make sure to call `self/0` outside the `spawn/1` function in order to take the pid of the shell and not the pid of the process which will be started by calling `spawn/0`.
+
+
+The processes that we created so far were short lived processes. They start, they do their job and then they die. They don't hold and state and therefore we cannot do a lot of interesting things with such a process. Holding state is essential to have some meaningful logic. In order to do that with processes we have to make sure to keep the process alive after it finishes it's task. 
+
+What we could do to accomplish this would be to have a `receive do` block that would wait for a message to come with some instructions on what to do, and after the job is done, to call `receive do` block again in order to wait for another message with instructions to come. The process will be kept alive because it's waiting for a message and will stay there until a message arrives. Writing this down in the shell would to too cumbersome, so let's write an Elixir module (that would be a file that ends with an `.ex` extension).
+
+```elixir
+defmodule TodoServer do
+  # Starts a process and calls `loop/1` inside, which recursively will hold the process alive
+  def start() do
+    spawn(fn -> loop([]) end)
+  end
+
+  # Here is the looping logic that will keep this process alive. The loop function calls the 
+  # `receive do` block and after it executes the necessary task it takes the result,
+  # which in our case is the new state and calls `loop/1` again.
+  defp loop(state) do
+    new_state = receive do 
+      {:add, todo} -> [%{id: length(state) + 1, name: todo} | state]
+      {:remove, id} -> Enum.filter(state, fn %{id: todo_id} -> id !== todo_id end)
+      :show -> IO.inspect(state)
+    end
+
+    # Call `loop/1` again to keep the process going
+    loop(new_state)
+  end
+end
+```
+We have 3 actions that are available through the TodoServer. 
+1. Add a todo
+2. Remove a todo
+3. Show all todos
+
+Let's see how this code works in action
+```elixir
+iex(1)> TodoServer.start() # <- We forgot to bind the pid to a variable
+#PID<0.520.0>
+iex(2)> todo_server = pid(0, 520, 0) # <- We can always create a pid using the `pid/3` function
+#PID<0.520.0>
+iex(3)> Process.alive?(todo_server) 
+true
+iex(4)> send(todo_server, {:add, "mop the floors"})
+{:add, "mop the floors"}
+iex(5)> send(todo_server, {:add, "clean the dust"})
+{:add, "clean the dust"}
+iex(5)> send(pid, :show)
+[${id: 2, name: "clean the dust"}, %{id: 1, name: "mop the floors"}]
+:show
+iex(6)> send(pid, :unknown) # <- Sending an unknown message to the process won't cause issues
+:unknown                    # <- The message will stay in the message box and never be processed
+```
