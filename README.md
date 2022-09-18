@@ -26,6 +26,7 @@ If you are a beginner this is a good place to start learning Elixir
   - [Cond expressions](#cond-expressions)
   - [Case expressions](#case-expressions)
   - [With expression](#with-expression)
+  - [Data abstraction via Struct](#data-abstraction-via-struct)
   - [Concurrency](#concurrency)
     - [Creating a process](#creating-a-process)
     - [Message passing](#message-passing)
@@ -779,6 +780,72 @@ else
   error_pattern2 ->
     # some error
 end
+```
+
+## Data abstraction via Struct
+Usually when you want to represent coupled data you would use `Maps`. They are a goto structure because of the features in has (direct access through keys, dynamic size, give visually good representation of the data). Well a `Struct` is a lot like a `Map`, but is more contained.
+1. A `Struct` has a name (given by the module name in which the `Struct` is created)
+2. It has a limited set of keys that can be filled in. You cannot add or remove keys from a `Struct`
+3. Can have default values for keys who were not filled in upon creating the `Struct`
+
+Let's define a simple `Struct`
+```elixir
+defmodule Todo do
+  defstruct task: nil, done: false
+end
+```
+`defstruct` is the macro we are using to define a `Struct` it takes a keyword list where all the necessary keys/fields should be specified. Each field can specify a default value, which will be set if a value is not provided upon creating the `Struct`. If a default value is not specified, by default it is going to be `nil`.
+
+The same struct could be specified like so
+```elixir
+defmodule Todo do
+  defstruct [:task, done: false]
+  
+  # Since it's a keyword list a full representation would be like so
+  # defstruct [:task, {:done, false}]
+
+  # An error is thrown if a key with specified default value is followed by one without
+  # defstruct [done: false, :task]
+  # ** (SyntaxError) iex:107: syntax error before: task
+end
+```
+
+Let's see them in practice
+```elixir
+iex(1)> my_todo = %Todo{task: "clean the dishes"}
+%Todo{done: false, task: "clean the dishes"}
+iex(2)> unknown_todo = %Todo{} # <- None of the fields are required to create a `Todo` Struct
+%Todo{done: false, task: nil}
+iex(3)> my_todo = %Todo{importance: 10} # <- Only fields defined in the Struct are allowed to exist
+** (KeyError) key :importance not found
+    expanding struct: Todo.__struct__/1
+    iex:125: (file)
+iex(4)> %Todo{my_todo | done: true} # <- Structs can be updated just like maps
+%Todo{done: true, task: "clean the dishes"}
+iex(5)> %{done: done, task: task} = my_todo # <- You can match against a map structure 
+%Todo{done: true, task: "clean the dishes"}
+iex(6)> %Todo{} = my_todo # <- You can match to a Struct, verifying that my_todo is a `Todo` Struct
+%Todo{done: true, task: "clean the dishes"}
+iex(7)> %Todo{done: done, task: task} = my_todo # <- You can pull fields as well
+%Todo{done: true, task: "clean the dishes"}
+iex(8)> %Todo{} = %{done: false, task: "some task name"} # <- You can't match map to a Struct
+** (MatchError) no match of right hand side value: %{done: false, task: "some task name"}
+```
+
+A struct can have required field upon creation.
+```elixir
+defmodule Todo do
+  @enforce_keys [:task]
+  defstruct [:task, done: false]
+end
+```
+
+Now you cannot create an empty `Todo` Struct
+```elixir
+iex(1)> %Todo{}
+** (ArgumentError) the following keys must also be given when building struct Todo: [:task]
+    expanding struct: Todo.__struct__/1
+    iex:123: (file)
 ```
 
 ## Concurrency
