@@ -40,14 +40,14 @@ available material.
 ## Working with the shell
 Elixir as many other languages has an interactive shell where you can immediately jump into trying stuff in Elixir. Basically writing code and getting some results back.
 
-To launch Elixir's shell just type `iex` in your terminal:
+To launch Elixir's shell just type `iex` in your terminal (_on Windows machines you might need to use `iex.bat`_):
 ```elixir
 $ iex
 Interactive Elixir (1.13.3) - press Ctrl+C to exit (type h() ENTER for help)
 iex(1)>
 ```
 
-Running `iex` starts an instance of the `BEAM` _(BEAM is the virtual machine used to implement Erlang. Therefore Elixir also runs on it)_ and then starts an interactive Elixir shell inside it.
+Running `iex` starts an instance of the `BEAM` VM _(BEAM is a virtual machine on which Erlang runs. Elixir also runs on BEAM)_ and then starts an interactive Elixir shell inside it.
 
 In the interactive shell you can enter an expression and the shell will return it's result. 
 For example:
@@ -63,7 +63,7 @@ iex(1)> 1 + 1 <-- This is the expression we've entered
 iex(2) <-- The shell immediately gives us the next row to enter a new expression
 ```
 
-**NOTE** Everything is Elixir is an expression that has a return value. This includes not only function calls, but also constructs like `if` and many other which you'll learn more about later on.
+**NOTE** Everything is Elixir is an expression that returns a value. This includes not only function calls, but also constructs like `if` and many other which you'll learn more about later on.
 
 You don't need to write everything on one line in the shell. The shell is smart to understand that if you hit Enter and the expression is not finished it will continue on the same row.
 ```elixir
