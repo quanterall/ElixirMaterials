@@ -4,6 +4,7 @@
 - [Cond](#cond)
   - [Exercises](#exercises-1)
 - [Case](#case)
+  - [Exercises](#exercises-2)
 - [With](#with)
 
 ## If
@@ -191,6 +192,10 @@ def num_(2), do: 2
 def num_(_), do: "The number is neither 1 or 2"
 ```
 Depending on the situation, having the pattern match in the function arguments can be more descriptive. Use your judgement to determine in which scenario which approach you'll take.
+
+### Exercises
+
+1. Make the `calculate/2` task using `case`.
 
 ## With
 The `with` expression is a combination of multiple nested `case` expressions. It is very useful to reduce clutter in your code and follow the "happy" path of your logic. Let's give an example

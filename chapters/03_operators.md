@@ -8,10 +8,11 @@
   - [Boolean or operator](#boolean-or-operator)
   - [! operator](#-operator)
   - ["not" operator](#not-operator)
+  - [Exercises](#exercises)
 - [Comparison operators](#comparison-operators)
 - [Special operators](#special-operators)
   - [The match operator](#the-match-operator)
-    - [Exercises](#exercises)
+    - [Exercises](#exercises-1)
   - [The pin operator](#the-pin-operator)
 
 
@@ -125,13 +126,13 @@ Provides a short-circuit operator that evaluates and returns the second expressi
 
 The first expression should always evaluate to a `boolean` value. If not a `BadBooleanError` is going to be raised.
 ```elixir
-iex(1)> true && true
+iex(1)> true and true
 true
-iex(2)> true && false
+iex(2)> true and false
 false
-iex(3)> true && 77
+iex(3)> true and 77
 77
-iex(4)> false && "this is not evaluated"
+iex(4)> false and "this is not evaluated" # <-- Short-circuit and returns false
 false
 iex(5)> nil and true
 ** (BadBooleanError) expected a boolean on left-side of "and", got: nil
@@ -173,9 +174,9 @@ iex(3)> !"hello"
 false
 iex(4)> !nil
 false
-iex(5)> !List.first([]) # <-- Evaluates to nil
+iex(5)> !Enum.empty?([1])
 true
-iex(6)> !Enum.empty?([1])
+iex(6)> !List.first([]) # <-- Evaluates to nil
 true
 ```
 
@@ -194,6 +195,14 @@ iex(4)> not List.first([]) # <-- Evaluates to nil
 ** (ArgumentError) argument error
     :erlang.not(nil)
 ```
+
+### Exercises
+
+1. Write a function that takes two numbers and a list and returns true only if both numbers are in the list.
+2. Write a function that takes two lists and validates that each element in the second list is present in the first list.
+
+Notes
+1. [`Enum.all?`](https://hexdocs.pm/elixir/1.12/Enum.html#all?/2)
 
 ## Comparison operators
 Elixir supports all the general comparison operators:
@@ -335,6 +344,46 @@ def tail_and_list([_ | t] = list) do
 end
 ```
 
+There is a problem with the above functions. What if we pass an empty list? What happens is that the function raises an `FunctionClauseError`.
+
+```elixir
+iex(1)> App.head_and_list([]) # <-- `App` is the module where the function is defined
+** (FunctionClauseError) no function clause matching in App.head_and_list/1
+```
+
+Since we want to get the first element of a list it makes sense to require it to not be empty, yet this error message is not expressing that clearly. 
+Before we start looking into some conditional expressions, what Elixir allows us to do is defining multiple function clauses. This means that you can write the same function multiple times with different number of arguments, or the same amount of arguments but different argument pattern matches.
+
+```elixir
+# In this scenario it wouldn't matter if we put this function clause first or second. But there are circumstances where this makes a difference, so be careful. You wouldn't want to put a more broad pattern match before a more specific one.
+def head_and_list([]) do
+  # Don't think much about what is happening here, we'll take another look at rasing/throwing exception in the following chapters.
+  # What is important here is that we'll raise an exception that now gives some meaningful information back to the caller
+  raise(ArgumentError, "Cannot pull out head out of an empty list")
+end
+
+def head_and_list([h | _] = list) do
+  {h, list}
+end
+```
+
+Calling it after the change
+```elixir
+iex(1)> App.head_and_list([])
+** (ArgumentError) Cannot pull out head out of an empty list
+```
+
+While we are on the topic of defining multiple functions clauses, let's see how this works for anonymous functions.
+```elixir
+iex(1)> head = fn [] -> raise(ArgumentError, "Empty list"); [h | _] -> h end # <-- Separate clauses with semi colon
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(2)> head = fn # <-- Or just have each clause on a separate line
+...(2)>   [] -> raise(ArgumentError, "Empty list") 
+...(2)>   [h | _] -> h
+...(2)> end
+#Function<42.3316493/1 in :erl_eval.expr/6>
+```
+
 #### Exercises
 
 1. Write a pattern match to capture:
@@ -345,7 +394,15 @@ end
 2. Write a function that takes one argument and makes sure it's a list with at minimum 2 elements
 3. Write a function that takes one argument and makes sure it's a list with exactly 2 elements
 4. Write a function that takes one argument and makes sure it's a list with at minimum 2 equal elements
-5. Write a function that takes one argument and makes sure it's a list with exactly 2 equal elements 
+5. Write a function that takes one argument and makes sure it's a list with exactly 2 equal elements
+6. Write a function that takes three arguments. The first one is a string, the next two represent characters that should be replaced. For example `"hello"` to become `"hewwo"` you need to specify that all `'l'`s should be replaced with `'w'`s.
+   1. Utilize strings to specify the character to be replaced and replacer
+   2. Utilize characters/ascii values _(Remember what characters essentially are)_
+
+Notes for Exercise #6
+1. [`String.graphemes`](https://hexdocs.pm/elixir/1.12/String.html#graphemes/1)
+2. [`List.to_string`](https://hexdocs.pm/elixir/1.12/List.html#to_string/1)
+3. [`String.to_charlist`](https://hexdocs.pm/elixir/1.12/String.html#to_charlist/1)
 
 
 Values:

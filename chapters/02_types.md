@@ -9,9 +9,9 @@
     - [Exercises](#exercises-2)
   - [Tuples](#tuples)
     - [Exercises](#exercises-3)
-  - [Lists](#lists)
-    - [Exercises](#exercises-4)
   - [Anonymous functions](#anonymous-functions)
+    - [Exercises](#exercises-4)
+  - [Lists](#lists)
     - [Exercises](#exercises-5)
 
 # Working with variables
@@ -162,8 +162,8 @@ iex(1)> :]
     |
 iex(2)> :"]"
 :"]"
-iex(3)> String.to_atom(" ") # <-- Strings can be converted to atoms
-:" "
+iex(3)> String.to_atom("hello world") # <-- Strings can be converted to atoms
+:"hello world"
 ```
 
 **NB** Since atoms are constants where the name is equal to the value, they can never change. Once an atom is created it's added to a special atom table in the memory of the BEAM VM. They are never garbage collected and will stay in memory until the system exits. So it's never a good idea to use atoms for things that can grow indefinitely like ids and such or have them be created from an input. BEAM will crash once the limit of atoms is reached. _(You can check your current limit via `:erlang.system_info(:atom_limit)`. That number can be increased, but if you have this problem then you are probably doing something wrong)_
@@ -177,7 +177,7 @@ iex(3)> String.to_atom(" ") # <-- Strings can be converted to atoms
     :hello_world
     ```
 
-Helpful links
+Notes
 1. [`String.trim/1`](https://hexdocs.pm/elixir/1.12/String.html#trim/1)
 
 
@@ -198,9 +198,76 @@ iex(2)> elem(person, 0)
 ```
 
 ### Exercises
-1. Make the function from the last [Exercise](#exercises-2) to return a tuple, where the first element is the newly created atom and the second element is the length of this atom.
+1. Write a function that given a string returns a 2 element tuple with the given string and its length.
+    ```elixir
+    iex(1)> with_length("hello")
+    {"hello", 5}
+    iex(1)> with_length("")
+    {"", 0}
+    ```
 
+## Anonymous functions
+Anonymous function in Elixir are treated a first-class citizens, which means that they can be used as any other basic type: bound to a variable, returned from a function, passed as argument to a function. Because of this it's really easy pass executable code around.
 
+An anonymous function is delimited by the keywords `fn` and `end`.
+The recipe is the following: `fn ({args...}) -> {expression} end`
+```elixir
+iex(1)> add = fn (a, b) -> a + b end # <-- Notice that the returned value is a reference to the function
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(2)> add.(1, 2) # <-- To call an anonymous function a dot should be placed between the name and the opening parentheses
+3
+iex(3)> multiply = fn (a, b) -> # <-- Can be written on more than one line
+...(3)> a * b
+...(3)> end
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(4)> multiply.(2, 4)
+8
+```
+
+Anonymous function are also identified by the amount of arguments (also called `arity`) they receive. Elixir provides `is_function/1` and `is_function/2` to verify if something is a function and how many arguments it's expecting.
+
+```elixir
+iex(1)> add = fn (a, b) -> a + b end
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(2)> is_function(add)
+true
+iex(3)> is_function(add, 1)
+false
+iex(4)> is_function(add, 2)
+true
+```
+
+A variable assigned inside an anonymous function does not affect it's surrounding environment
+```elixir
+iex(1)> x = 42
+42
+iex(2)> (fn -> x = 0 end).() # <-- Writing and executing on the same line
+0
+iex(3)> x
+42
+```
+
+Function can be passed down as arguments
+```elixir
+iex(1)> add = fn (a, b) -> a + b end 
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(2)> multiply = fn (a, b) -> a * b end
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(3)> execute = fn (fun, arg1, arg2) -> fun.(arg1, arg2) end # <-- Taking a function as an argument
+#Function<40.3316493/3 in :erl_eval.expr/6>
+iex(4)> execute.(add, 2, 4)
+6
+iex(5)> execute.(multiply, 2, 4)
+8
+```
+
+### Exercises
+
+1. Write a function for dividing two numbers
+2. Write a **currying** function for adding two numbers
+
+Notes
+1. `Currying` is a transformation of functions that translates a function from callable as `f(a, b, c)` into callable as `f(a)(b)(c)`. To learn more about the topic go to [wikipedia](https://en.wikipedia.org/wiki/Currying)
 
 ## Lists
 Lists in Elixir are implemented as linked lists. What that means is that the elements are not stored together in the memory, but rather every element has a pointer to the memory where the next element is stored. Because of that adding elements to the beginning of lists in Elixir is a faster operation than adding it to the end of the list _(Adding an element at the end means that Elixir has to traverse the whole list to find where the end is. In contract adding to the beginning is just as easy as having the new element point to the current list.)_
@@ -273,66 +340,15 @@ Both operations are `O(1)`, because they amount to reading one or the other valu
     iex(1)> capitalizeFirst("_hello")
     "_hello"
     ```
-2. Write a function takes a 
+2. Write a function that given a list of numbers
+   1. Returns `true` if the first number in the list is `even`, otherwise returns `false`
+   2. Returns a list where each number is multiplied by 5
+   3. Returns only the even numbers
+   4. Returns a sum of all the numbers multiplied by 5
 
-Helpful links
-1. [`String.codepoints/1`](https://hexdocs.pm/elixir/1.12/String.html#codepoints/1)
-
-## Anonymous functions
-Anonymous function in Elixir are treated a first-class citizens, which means that they can be used as any other basic type: bound to a variable, returned from a function, passed as argument to a function. Because of this it's really easy pass executable code around.
-
-An anonymous function is delimited by the keywords `fn` and `end`.
-The recipe is the following: `fn ({args...}) -> {expression} end`
-```elixir
-iex(1)> add = fn (a, b) -> a + b end # <-- Notice that the returned value is a reference to the function
-#Function<41.3316493/2 in :erl_eval.expr/6>
-iex(2)> add.(1, 2) # <-- To call an anonymous function a dot should be placed between the name and the opening parentheses
-3
-iex(3)> multiply = fn (a, b) -> # <-- Can be written on more than one line
-...(3)> a * b
-...(3)> end
-#Function<41.3316493/2 in :erl_eval.expr/6>
-iex(4)> multiply.(2, 4)
-8
-```
-
-Anonymous function are also identified by the amount of arguments (also called `arity`) they receive. Elixir provides `is_function/1` and `is_function/2` to verify if something is a function and how many arguments it's expecting.
-
-```elixir
-iex(1)> add = fn (a, b) -> a + b end
-#Function<41.3316493/2 in :erl_eval.expr/6>
-iex(2)> is_function(add)
-true
-iex(3)> is_function(add, 1)
-false
-iex(4)> is_function(add, 2)
-true
-```
-
-A variable assigned inside an anonymous function does not affect it's surrounding environment
-```elixir
-iex(1)> x = 42
-42
-iex(2)> (fn -> x = 0 end).() # <-- Writing and executing on the same line
-0
-iex(3)> x
-42
-```
-
-Function can be passed down as arguments
-```elixir
-iex(1)> add = fn (a, b) -> a + b end 
-#Function<41.3316493/2 in :erl_eval.expr/6>
-iex(2)> multiply = fn (a, b) -> a * b end
-#Function<41.3316493/2 in :erl_eval.expr/6>
-iex(3)> execute = fn (fun, arg1, arg2) -> fun.(arg1, arg2) end
-#Function<40.3316493/3 in :erl_eval.expr/6>
-iex(4)> execute.(add, 2, 4)
-6
-iex(5)> execute.(multiply, 2, 4)
-8
-```
-
-### Exercises
-
-TBA
+Notes
+1. [`String.graphemes/1`](https://hexdocs.pm/elixir/1.12/String.html#graphemes/1)
+2. [`rem`](https://hexdocs.pm/elixir/1.12/Kernel.html#rem/2)
+3. [`Enum.map`](https://hexdocs.pm/elixir/1.12/Enum.html#map/2)
+4. [`Enum.filter`](https://hexdocs.pm/elixir/1.12/Enum.html#filter/2)
+5. [`Enum.reduce`](https://hexdocs.pm/elixir/1.12/Enum.html#reduce/3)
