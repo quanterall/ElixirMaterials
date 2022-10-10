@@ -82,7 +82,7 @@ The _cond_ expression is what you are looking for the cases where you need an `e
 def hello(language, name) do
   greeting = cond do
     language == "spanish" -> "hola"
-    language == "german" -> "bonjour"
+    language == "french" -> "bonjour"
     true -> "hello"
   end
 
