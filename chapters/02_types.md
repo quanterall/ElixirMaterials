@@ -78,11 +78,11 @@ iex(2)> 'hello' <> ' world'
     iex(2)> connect("hello ", "world")
     "hello  world"
     ```
-2. Create a function called `connectWith/3` that takes three strings, where the third is meant to be the 'connection' between the first two strings.
+2. Create a function called `connect_with/3` that takes three strings, where the third is meant to be the 'connection' between the first two strings.
     ```elixir
-    iex(1)> connectWith("hello", "world", " ")
+    iex(1)> connect_with("hello", "world", " ")
     "hello world"
-    iex(2)> connectWith("hello ", "world", " my ")
+    iex(2)> connect_with("hello ", "world", " my ")
     "hello my world"
     ```
 
@@ -171,9 +171,9 @@ iex(3)> String.to_atom("hello world") # <-- Strings can be converted to atoms
 ### Exercises
 1. Create a function that takes two strings, removes all trailing and leading spaces, connects them together with an underscore and converts it to an atom.
     ```elixir
-    iex(1)> connectToAtom("hello", "world")
+    iex(1)> connect_to_atom("hello", "world")
     :hello_world
-    iex(2)> connectToAtom(" hello", "world ")
+    iex(2)> connect_to_atom(" hello", "world ")
     :hello_world
     ```
 
@@ -333,11 +333,11 @@ iex(2)> tl([1, 2, 3])
 Both operations are `O(1)`, because they amount to reading one or the other value from the `[head | tail]` pair.
 
 ### Exercises
-1. Write a function will capitalize only the first letter for a given String
+1. Write a function that will capitalize only the first letter for a given String
     ```elixir
-    iex(1)> capitalizeFirst("hello")
+    iex(1)> capitalize_first("hello")
     "Hello"
-    iex(1)> capitalizeFirst("_hello")
+    iex(1)> capitalize_first("_hello")
     "_hello"
     ```
 2. Write a function that given a list of numbers
