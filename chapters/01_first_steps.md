@@ -60,7 +60,7 @@ iex(1)> 1 +
 
 In the `iex shell` you can see the documentation of every module/function by just calling `h` in front of the module/function for which you want to see the docs (if there are any). That would be `h <module>.<function>` for pulling function docs or `h <module>` for pulling module docs.
 ```elixir
-iex(1)> h Enum # <-- Pulling the module docs
+iex(1)> h Enum
 
                                   Enum                                   
 
@@ -111,7 +111,11 @@ cases, you should use the Stream module, which allows you to lazily
 express computations, without traversing collections, and work with
 possibly infinite collections. See the Stream module for examples and
 documentation.
-iex(2)> Enum. # <-- You get auto completion by pressing `Tab`
+```
+
+The shell has autocompletion. _For Windows autocompletion works only if the shell has been started with the `--werl` option_
+```elixir
+iex(2)> Enum. # <-- Press `Tab` to get this output
 EmptyError           OutOfBoundsError     all?/1               
 all?/2               any?/1               any?/2               
 at/2                 at/3                 chunk_by/2           
@@ -146,7 +150,11 @@ uniq/1               uniq_by/2            unzip/1
 with_index/1         with_index/2         zip/1                
 zip/2                zip_reduce/3         zip_reduce/4         
 zip_with/2           zip_with/3 
-iex(3)> h Enum.at # <-- Pulling the function docs
+```
+
+Pulling documentation for a function
+```elixir
+iex(3)> h Enum.at
 
                 def at(enumerable, index, default \\ nil)                 
 
