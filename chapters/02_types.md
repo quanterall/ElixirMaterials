@@ -13,6 +13,7 @@
     - [Exercises](#exercises-4)
   - [Lists](#lists)
     - [Exercises](#exercises-5)
+  - [Inspecting values in the shell](#inspecting-values-in-the-shell)
 
 # Working with variables
 Elixir is a _dynamic_ language, which means that when you declare a variable you are not specifying a type. The type is going to be automatically determined from the data it contains at the moment. This means that the type can change based on the usage. We can initialize a variable with an integer value and later bind it to a string value without any issue.
@@ -67,6 +68,30 @@ iex(2)> 'hello' <> ' world'
     (elixir 1.13.4) lib/kernel.ex:1913: Kernel.extract_concatenations/2
     (elixir 1.13.4) expanding macro: Kernel.<>/2
     iex:5: (file)
+```
+
+In Elixir string interpolation has the following pattern: `"hello #{<expression>}"`
+```elixir
+iex(1)> var = "world"
+"world"
+iex(2)> "hello #{var}"
+"hello world"
+```
+There are some constructions that cannot be interpolated by just passing their value. An example for that is the `pid`.
+```elixir
+iex(1)> my_pid = pid(0, 22, 32)
+#PID<0.22.32>
+iex(2)> "hello from #{my_pid}"
+** (Protocol.UndefinedError) protocol String.Chars not implemented for #PID<0.22.32> of type PID
+    (elixir 1.13.4) lib/string/chars.ex:3: String.Chars.impl_for!/1
+    (elixir 1.13.4) lib/string/chars.ex:22: String.Chars.to_string/1
+```
+In order to supply the `pid` to the string, we have to convert it to string. We can do so by using the `inspect/2` function.
+```elixir
+iex(1)> my_pid = pid(0, 22, 32)
+#PID<0.22.32>
+iex(2)> "hello from #{inspect(pid)}"
+"hello from #PID<0.22.32>"
 ```
 
 ### Exercises
@@ -352,3 +377,42 @@ Notes
 3. [`Enum.map`](https://hexdocs.pm/elixir/1.12/Enum.html#map/2)
 4. [`Enum.filter`](https://hexdocs.pm/elixir/1.12/Enum.html#filter/2)
 5. [`Enum.reduce`](https://hexdocs.pm/elixir/1.12/Enum.html#reduce/3)
+
+## Inspecting values in the shell
+While in the shell, information about a value (like: `type`, `size` `description`) can be obtained by using the `i` function.
+
+```elixir
+iex(1)> str = "hello"
+"hello"
+iex(2)> i "hello"
+Term
+  "hello"
+Data type
+  BitString
+Byte size
+  5
+Description
+  This is a string: a UTF-8 encoded binary. It's printed surrounded by
+  "double quotes" because all UTF-8 encoded code points in it are printable.
+Raw representation
+  <<104, 101, 108, 108, 111>>
+Reference modules
+  String, :binary
+Implemented protocols
+  Collectable, IEx.Info, Inspect, List.Chars, String.Chars
+```
+
+You can pass a already bound variable as well
+```elixir
+iex(1)> my_list = [1, 2, 3]
+[1, 2, 3]
+iex(2)> i my_list
+Term
+  [1, 2, 3]
+Data type
+  List
+Reference modules
+  List
+Implemented protocols
+  Collectable, Enumerable, IEx.Info, Inspect, List.Chars, String.Chars
+```
