@@ -1,17 +1,24 @@
 - [Arithmetic operators](#arithmetic-operators)
 - [List operators](#list-operators)
+  - [Concatenation `++` operator](#concatenation--operator)
+  - [Subtraction `--` operator](#subtraction----operator)
+  - [Membership `in` / `not in` operators](#membership-in--not-in-operators)
 - [String operators](#string-operators)
+  - [Concatenation `<>` operator](#concatenation--operator-1)
+  - [Text-based match `=~` operator](#text-based-match--operator)
 - [General Operators](#general-operators)
-  - [Boolean && operator](#boolean--operator)
-  - [Boolean "and" operator](#boolean-and-operator)
-  - [Boolean || operator](#boolean--operator-1)
-  - [Boolean or operator](#boolean-or-operator)
-  - [! operator](#-operator)
-  - ["not" operator](#not-operator)
+  - [Boolean relaxed `&&` operator](#boolean-relaxed--operator)
+  - [Boolean strict `and` operator](#boolean-strict-and-operator)
+  - [Boolean relaxed `||` operator](#boolean-relaxed--operator-1)
+  - [Boolean strict `or` operator](#boolean-strict-or-operator)
+  - [Boolean relaxed `!` operator](#boolean-relaxed--operator-2)
+  - [Boolean strict `not` operator](#boolean-strict-not-operator)
   - [Exercises](#exercises)
 - [Comparison operators](#comparison-operators)
-- [Special operators](#special-operators)
-  - [The match operator](#the-match-operator)
+- [Capture `&` operator](#capture--operator)
+  - [Referencing a function](#referencing-a-function)
+  - [Creating an anonymous function](#creating-an-anonymous-function)
+- [Match `=` operator](#match--operator)
     - [Exercises](#exercises-1)
   - [The pin operator](#the-pin-operator)
 
@@ -52,19 +59,23 @@ iex(10)> 2 ** 8
 ```
 
 ## List operators
+
+### Concatenation `++` operator
 The `++` operator is used for concatenation of lists
 ```elixir
 iex(1)> [1, 2, 3] ++ [4, 5]
 [1, 2, 3, 4, 5]
 ```
 
+### Subtraction `--` operator
 The `--` operator is used for list subtraction
 ```elixir
 iex(1)> [1, 2, 3] -- [2]
 [1, 2]
 ```
 
-The `in` operator is used for checking if a value in present in a list.
+### Membership `in` / `not in` operators
+The `in` operator is used for checking if an element in present in a list.
 ```elixir
 iex(1)> 1 in [1, 2, 3]
 true
@@ -72,7 +83,7 @@ iex(2)> 4 in [1, 2, 3]
 false
 ```
 
-The `not in` operator is the opposite of the `in` operator
+The `not in` operator is used for checking if an element is absent from a list
 ```elixir
 iex(1)> 1 not in [1, 2, 3]
 false
@@ -80,15 +91,18 @@ iex(2)> 4 not in [1, 2, 3]
 true
 ```
 
-_Both `in` and `not in` are actually macros which translate to the function `Enum.member?/2`_
+_Both `in` and `not in` are actually macros which translate to the function `Enum.member?/2`. Therefore called the membership operators._
 
 ## String operators
+
+### Concatenation `<>` operator
 The `<>` operator is used for concatenation of strings
 ```elixir
 iex(1)> "hello" <> " world"
 "hello world"
 ```
 
+### Text-based match `=~` operator
 `=~` is used for regex and string matching. 
 
 `left ~= right` where the `right` is the regex pattern/string which is being matched against the `left` value. If the `right` value regex, the operator will return `true` if the regex pattern matches the string in the `left` value. If the `right` value is a string, the operator will return `true` if the `left` value contains the `right` value.
@@ -109,7 +123,7 @@ false
 
 
 ## General Operators
-### Boolean && operator
+### Boolean relaxed `&&` operator
 Provides a short-circuit operator that evaluates and returns the second expression only if the first one evaluates to a truthy value (that is, it is neither false nor nil). Returns the first expression otherwise.
 
 ```elixir
@@ -121,7 +135,7 @@ iex(3)> Enum.empty?([]) && List.first([1])
 1
 ```
 
-### Boolean "and" operator
+### Boolean strict `and` operator
 Provides a short-circuit operator that evaluates and returns the second expression only if the first one is `true`. Return `false` otherwise.
 
 The first expression should always evaluate to a `boolean` value. If not a `BadBooleanError` is going to be raised.
@@ -138,7 +152,7 @@ iex(5)> nil and true
 ** (BadBooleanError) expected a boolean on left-side of "and", got: nil
 ```
 
-### Boolean || operator
+### Boolean relaxed `||` operator
 Provides a short-circuit operator that evaluates and returns the second expression only if the first one evaluates to a falsy value (that is, it is either nil or false). Returns the first expression otherwise.
 
 ```elixir
@@ -150,7 +164,7 @@ iex(3)> Enum.empty?([]) || List.first([1]) # <-- Short-circuit and returns true
 true
 ```
 
-### Boolean or operator
+### Boolean strict `or` operator
 Provides a short-circuit operator that evaluates and returns the second expression only if the first one is `false`. Return `true` otherwise.
 
 The first expression should always evaluate to a `boolean` value. If not a `BadBooleanError` is going to be raised.
@@ -163,7 +177,7 @@ iex(3)> nil or true
 ** (BadBooleanError) expected a boolean on left-side of "or", got: nil
 ```
 
-### ! operator
+### Boolean relaxed `!` operator
 Used to determine if value is **not** true. It can be used with any values (not just booleans) and returns `true` if value is `false` or `nil`, otherwise it returns `false`
 ```elixir
 iex(1)> !true
@@ -180,7 +194,7 @@ iex(6)> !List.first([]) # <-- Evaluates to nil
 true
 ```
 
-### "not" operator
+### Boolean strict `not` operator
 Used to determine if value is **not** true. It can be used only with booleans and returns `true` if value is `false`, otherwise it returns `false`.
 
 If a non boolean value is used it raises an `ArgumentError` exception.
@@ -225,8 +239,125 @@ iex(2)> 1 === 1.0
 false
 ```
 
-## Special operators
-### The match operator
+## Capture `&` operator
+The capture operator `&` captures or creates an anonymous function. It can be used in variety of cases.
+
+### Referencing a function
+Most commonly the capture operator `&` is used to capture or in other terms, reference a function with given name, arity and module, like so `&<Module>.<function_name>/<arity>` _(the arity is the amount of arguments the function is taking)_. This could be a function in your project or an Elixir function.
+
+For functions that have multiple definitions with different arity, the provided arity is going to determine which one of them is being referenced.
+For example to capture `String.capitalize/2` one would write `&String.capitalize/2` and  `String.capitalize/1` is captured via `&String.capitalize/1`.
+
+The result of a capture is a reference to the function. Similar to what a result is for writing an anonymous function.
+```elixir
+iex(1)> capitalize = &String.capitalize/1
+&String.capitalize/1
+iex(2)> capitalize.("hello")
+"Hello"
+```
+
+The module name can be omitted if the function that is being referenced is defined in the same module or is imported
+```elixir
+defmodule MyApp do
+  def double(num), do: num * 2
+
+  def double_values_in_list(list) do
+    # Here you could write &MyApp.double/1, but it is not necessary, because the function is defined in the module in which it is being used.
+    Enum.map(list, &double/1)
+  end
+end
+```
+
+Perfect usage for function reference is when a function requires another function as an argument. One way to provide the needed functionality would be to write an anonymous function, but if there is a function that has the needed functionality, one simply needs to reference that function.
+
+If it was necessary to capitalize each string in a list of strings we can do the following
+```elixir
+iex(1)> Enum.map(["hello", "world"], fn str -> String.capitalize(str) end) # <-- Without using capture
+["Hello", "World"]
+iex(2)> Enum.map(["hello", "world"], &String.capitalize/1) # <-- Directly capturing the logic for capitalization
+["Hello", "World"]
+```
+
+Another way to capture a function is to use `Function.capture/3`. This style can be used if you want to programmatically capture/reference a function.
+```elixir
+iex(1)> capitalize = Function.capture(String, :capitalize, 1)
+&String.capitalize/1
+```
+
+### Creating an anonymous function
+The capture operator `&` can be used to create an anonymous function, where placeholders like `&1`, `&2`, etc. can be provided as potential arguments.
+```elixir
+iex(1)> add = &(&1 + &2)
+&:erlang.+/2
+iex(2)> add.(1, 2)
+3
+```
+In this example `&(&1 + &2)` is equivalent to `fn (num1, num2) -> num1 + num2 end`.
+
+The capture operator can take an arbitrary amount of placeholders.
+```elixir
+iex(1)> func = &(&1 + 10 * &2 - 100 / &3) # <-- Imagine this is some meaningful calculation
+#Function<40.3316493/3 in :erl_eval.expr/6>
+iex(2)> func.(10, 20, 30)
+206.66666666666666
+```
+
+The capture operator can be used to partially apply a function. 
+```elixir
+iex(1)> double = &(&1 * 2)
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(2)> double.(10)
+20
+```
+
+Partial application can be used on a captured function as well.
+```elixir
+iex(1)> take_five = &Enum.take(&1, 5)
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(2)> take_five([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+[1, 2, 3, 4, 5]
+iex(3)> tuple_first = &Kernel.elem(&1, 0)
+#Function<42.3316493/1 in :erl_eval.expr/6>
+iex(4)> tuple_first.({1, 2, 3, 4})
+1
+```
+
+The parenthesis of the capture operator can be omitted when constructing tuples and lists.
+```elixir
+iex(1)> tuple_2 = &{&1, &2}
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(2)> tuple_2.(1, 2)
+{1, 2}
+iex(3)> list_2 = &[&1, &2]
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(4)> list_2.(1, 2)
+[1, 2]
+iex(5)> build_list = &[&1 | &2]
+#Function<41.3316493/2 in :erl_eval.expr/6>
+iex(6)> build_list.(1, [2, 3, 4, 5])
+[1, 2, 3, 4, 5]
+```
+
+The only restrictions when using the capture operator `&` to create a function are:
+1. You should have at least one placeholder. When no placeholders are specified it raises a `CompileError`
+  ```elixir
+  iex(1)> &(1 + 2)
+  ** (CompileError) iex:54: invalid args for &, expected one of:
+
+  * &Mod.fun/arity to capture a remote function, such as &Enum.map/2
+  * &fun/arity to capture a local or imported function, such as &is_atom/1
+  * &some_code(&1, ...) containing at least one argument as &1, such as &List.flatten(&1)
+
+  Got: 1 + 2
+  ```
+2. You can have only one expression. Attempting to use multiple results in `CompileError`
+  ```elixir
+  iex(1)> &(&1; &2)
+  ** (CompileError) iex:54: invalid args for &, block expressions are not allowed, got: &1 
+  &2
+  ```
+
+## Match `=` operator
 The match operator `=` works by matching the right side to the pattern on the left side.
 `pattern = value`. If the pattern matches the value then the match is successful, otherwise it raises a `MatchError`. The return value of the match operator is the value on the right side.
 
