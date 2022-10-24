@@ -18,8 +18,9 @@
 - [Capture `&` operator](#capture--operator)
   - [Referencing a function](#referencing-a-function)
   - [Creating an anonymous function](#creating-an-anonymous-function)
+  - [Exercises](#exercises-1)
 - [Match `=` operator](#match--operator)
-    - [Exercises](#exercises-1)
+    - [Exercises](#exercises-2)
   - [The pin operator](#the-pin-operator)
 
 
@@ -357,6 +358,37 @@ The only restrictions when using the capture operator `&` to create a function a
   &2
   ```
 
+### Exercises
+All exercises should be done using the capture `&` operator
+1. Write a function that takes a number makes it to the power of 2
+  ```elixir
+  iex(1)> func.(5)
+  25
+  ```
+3. Write a function that takes two arguments and returns the result of their multiplication
+  ```elixir
+  iex(1)> func.(3, 5)
+  15
+  ```
+3. Write a function that takes a list of numbers and returns only the even ones. (Use the partial application)
+  ```elixir
+  iex(1)> func.([1, 2, 3, 4, 5])
+  [2, 4]
+  iex(2)> func.([3, 7])
+  []
+  ```
+4. Write a function that takes a number or a string, if a number is passed it should return `{:ok, <number>}` otherwise `{:error, <string>}`
+  ```elixir
+  iex(1)> func.(1)
+  {:ok, 1}
+  iex(2)> func.("hmm something is wrong")
+  {:error, "hmm something is wrong"}
+  ```
+
+**Notes**
+1. [`Enum.filter/2`](https://hexdocs.pm/elixir/1.12/Enum.html#filter/2)
+2. [`is_integer/1`](https://hexdocs.pm/elixir/1.12/Kernel.html#is_integer/1)
+
 ## Match `=` operator
 The match operator `=` works by matching the right side to the pattern on the left side.
 `pattern = value`. If the pattern matches the value then the match is successful, otherwise it raises a `MatchError`. The return value of the match operator is the value on the right side.
@@ -530,10 +562,10 @@ iex(2)> head = fn # <-- Or just have each clause on a separate line
    1. Utilize strings to specify the character to be replaced and replacer
    2. Utilize characters/ascii values _(Remember what characters essentially are)_
 
-Notes for Exercise #6
-1. [`String.graphemes`](https://hexdocs.pm/elixir/1.12/String.html#graphemes/1)
-2. [`List.to_string`](https://hexdocs.pm/elixir/1.12/List.html#to_string/1)
-3. [`String.to_charlist`](https://hexdocs.pm/elixir/1.12/String.html#to_charlist/1)
+**Notes**
+1. [`String.graphemes/1`](https://hexdocs.pm/elixir/1.12/String.html#graphemes/1)
+2. [`List.to_string/1`](https://hexdocs.pm/elixir/1.12/List.html#to_string/1)
+3. [`String.to_charlist/1`](https://hexdocs.pm/elixir/1.12/String.html#to_charlist/1)
 
 
 Values:
