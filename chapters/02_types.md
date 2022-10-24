@@ -202,7 +202,7 @@ iex(3)> String.to_atom("hello world") # <-- Strings can be converted to atoms
     :hello_world
     ```
 
-Notes
+**Notes**
 1. [`String.trim/1`](https://hexdocs.pm/elixir/1.12/String.html#trim/1)
 
 
@@ -291,7 +291,7 @@ iex(5)> execute.(multiply, 2, 4)
 1. Write a function for dividing two numbers
 2. Write a **currying** function for adding two numbers
 
-Notes
+**Notes**
 1. `Currying` is a transformation of functions that translates a function from callable as `f(a, b, c)` into callable as `f(a)(b)(c)`. To learn more about the topic go to [wikipedia](https://en.wikipedia.org/wiki/Currying)
 
 ## Lists
@@ -371,12 +371,12 @@ Both operations are `O(1)`, because they amount to reading one or the other valu
    3. Returns only the even numbers
    4. Returns a sum of all the numbers multiplied by 5
 
-Notes
+**Notes**
 1. [`String.graphemes/1`](https://hexdocs.pm/elixir/1.12/String.html#graphemes/1)
-2. [`rem`](https://hexdocs.pm/elixir/1.12/Kernel.html#rem/2)
-3. [`Enum.map`](https://hexdocs.pm/elixir/1.12/Enum.html#map/2)
-4. [`Enum.filter`](https://hexdocs.pm/elixir/1.12/Enum.html#filter/2)
-5. [`Enum.reduce`](https://hexdocs.pm/elixir/1.12/Enum.html#reduce/3)
+2. [`rem/2`](https://hexdocs.pm/elixir/1.12/Kernel.html#rem/2)
+3. [`Enum.map/2`](https://hexdocs.pm/elixir/1.12/Enum.html#map/2)
+4. [`Enum.filter/2`](https://hexdocs.pm/elixir/1.12/Enum.html#filter/2)
+5. [`Enum.reduce/3`](https://hexdocs.pm/elixir/1.12/Enum.html#reduce/3)
 
 ## Inspecting values in the shell
 While in the shell, information about a value (like: `type`, `size` `description`) can be obtained by using the `i` function.
