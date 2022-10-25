@@ -340,7 +340,7 @@ iex(6)> build_list.(1, [2, 3, 4, 5])
 ```
 
 The only restrictions when using the capture operator `&` to create a function are:
-1. You should have at least one placeholder. When no placeholders are specified it raises a `CompileError`
+1. At last one placeholder should be present. When no placeholders are specified it raises a `CompileError`
   ```elixir
   iex(1)> &(1 + 2)
   ** (CompileError) iex:54: invalid args for &, expected one of:
@@ -351,11 +351,20 @@ The only restrictions when using the capture operator `&` to create a function a
 
   Got: 1 + 2
   ```
-2. You can have only one expression. Attempting to use multiple results in `CompileError`
+2. Only one expression is allowed. Attempting to use multiple results in `CompileError`
   ```elixir
   iex(1)> &(&1; &2)
   ** (CompileError) iex:54: invalid args for &, block expressions are not allowed, got: &1 
   &2
+  ```
+3. Capture operators cannot be nested
+  ```elixir
+  iex(1)> &(Enum.map(&1, &(&1 + 1)))
+  ** (CompileError) iex:1: nested captures via & are not allowed: &(&1 + 1)
+    (stdlib 4.0.1) lists.erl:1462: :lists.mapfoldl_1/3
+    (stdlib 4.0.1) lists.erl:1463: :lists.mapfoldl_1/3
+    (elixir 1.13.4) src/elixir_fn.erl:140: :elixir_fn.escape/3
+    (elixir 1.13.4) src/elixir_fn.erl:112: :elixir_fn.capture_expr/6
   ```
 
 ### Exercises
@@ -365,7 +374,7 @@ All exercises should be done using the capture `&` operator
   iex(1)> func.(5)
   25
   ```
-3. Write a function that takes two arguments and returns the result of their multiplication
+2. Write a function that takes two arguments and returns the result of their multiplication
   ```elixir
   iex(1)> func.(3, 5)
   15
