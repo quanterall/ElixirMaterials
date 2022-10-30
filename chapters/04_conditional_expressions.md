@@ -86,7 +86,7 @@ def hello(language, name) do
   greeting = cond do
     language == :spanish -> "hola"    # if
     language == :french -> "bonjour"  # else if
-    true -> "hello"                    # else
+    true -> "hello"                   # else
   end
 
   "#{greeting} #{name}"
@@ -190,16 +190,25 @@ def num_(_), do: "The number is neither 1 nor 2"
 
 1. Make the `calculate/2` task using `case`.
 2. Write a `language_hello/1` function that takes a language as an argument, and based on the language it will return the way to say "hello" in that language. Languages to support: _spanish_, _english_, _japanese_ and _french_.
-3. 
+3. Write a function that takes a list of strings and returns a list of tuples, where each tuple has two elements. The first one represents a unique letter that is present in some of the strings and the second element is all the strings that start with that letter. It doesn't matter if the letter is capital or not.
+  ```elixir
+  iex(1)> func(["pan", "hello", "house", "mouse", "microphone", "t-shirt", "table", "hokey"])
+  [{'p', ["pan"]}, {'h', ["hello", "house", "hokey"]}, {'m', ["mouse", "microphone"]}, {'t', ["t-shirt", "table"]}]
+  ```
+   1. Order the list of tuples based on the position on the letter in the alphabet.
+   ```elixir
+   iex(1)> func(["pan", "hello", "house", "mouse", "microphone", "t-shirt", "table", "hokey"])
+   [{'h', ["hello", "house", "hokey"]}, {'m', ["mouse", "microphone"]}, {'p', ["pan"]}, {'t', ["t-shirt", "table"]}]
+   ```
 
 ## With
 The `with` expression is a combination of multiple nested `case` expressions. It is very useful to reduce clutter in your code and follow the "happy" path of your logic. Let's give an example
 
 You could write a logic like so, with 2 `case` expressions:
 ```elixir
-case condition1 do
+case condition_1 do
   success_pattern ->
-    case condition2 do
+    case condition_2 do
       success_pattern ->
         # do something here
       error_pattern ->
@@ -214,23 +223,23 @@ As you can see it doesn't look very clean when you nest 2 `case` expressions and
 
 We can simplify this logic using the `with` expression:
 ```elixir
-with success_pattern1 <- condition1,
-     success_pattern2 <- condition2 do
+with success_pattern_1 <- condition_1,
+     success_pattern_2 <- condition_2 do
   # do something here
 end
 ```
 
-In this example the `with` expression is not handling the different errors _(unsuccessful pattern matches)_ that each condition might result to. It's just propagating it as the result of the `with`. 
+In the example above the `with` expression is not handling the different errors _(unsuccessful pattern matches)_ that each condition might result to. It's just propagating it as the result of the `with` expression. 
 
 If we'd like to alter what the `with` expression is going to return for each of those errors, we can add an `else` clause:
 ```elixir
-with success_pattern1 <- condition1,
-     success_pattern2 <- condition2 do
+with success_pattern_1 <- condition_1,
+     success_pattern_2 <- condition_2 do
   # do something here
 else
-  error_pattern1 ->
+  error_pattern_1 ->
     # some error
-  error_pattern2 ->
+  error_pattern_2 ->
     # some error
 end
 ```
