@@ -1,10 +1,14 @@
 - [Range](#range)
 - [Keyword List](#keyword-list)
+  - [Accessing fields](#accessing-fields)
   - [Exercises](#exercises)
 - [Maps](#maps)
+  - [Creating Maps](#creating-maps)
+  - [Accessing fields](#accessing-fields-1)
+  - [Updating values](#updating-values)
   - [Exercises](#exercises-1)
 - [Struct](#struct)
-  - [Updating values](#updating-values)
+  - [Updating values](#updating-values-1)
   - [Default values](#default-values)
   - [Required fields](#required-fields)
   - [Exercises](#exercises-2)
@@ -111,6 +115,7 @@ iex(1)> repeating_keys = [range: 30, range: 80]
 [range: 30, range: 80]
 ```
 
+### Accessing fields
 There are few ways to access elements in a keyword list, but there is one thing to remember. When attempting to get a single value under a given key, you will always get the first value, and any other values under the same key will be silently ignored.
 
 1. Using the _[Access behavior](https://hexdocs.pm/elixir/Access.html)_ 
@@ -173,6 +178,8 @@ There are few things to remember about maps:
    1. When the entries are `<= 32` then Maps are implemented as an ordered Keyword list
    2. When the entries are `> 32` then Maps are implemented as [Hash arrayed map trie](https://en.wikipedia.org/wiki/Hash_array_mapped_trie)
 
+### Creating Maps
+
 Maps can be declared in two ways.
 1. With a literal form
     ```elixir
@@ -194,6 +201,8 @@ Maps can be declared in two ways.
     iex(2)> Map.new(keyword_list)
     %{a: 1, b: 2}
     ```
+
+### Accessing fields
 
 Maps can be accessed in a few different ways
 1. Using the Access behavior
@@ -234,6 +243,8 @@ Maps can be accessed in a few different ways
     iex(2)> Map.get(map, :a)
     1
     ```
+
+### Updating values
 
 Modifying Maps can happen in a two ways.
 1. Using the `|` symbol with the following recipe `%{<map> | <listing_of_key_value_pairs>}`
