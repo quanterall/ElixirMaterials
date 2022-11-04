@@ -149,9 +149,9 @@ end
 Bare in mind that you should make sure that you handle all the possible cases in your patterns. If you do not and end up with value that does not match in any of the given pattens, the `case` will raise an Exception:
 ```elixir
 iex(1)> case 10 do
-...(1)> 1 -> 1
-...(2)> 2 -> 2
-...(2)> end
+...(1)>   1 -> 1
+...(1)>   2 -> 2
+...(1)> end
 ** (CaseClauseError) no case clause matching: 10
 ```
 
@@ -160,13 +160,13 @@ In these situations you can add a pattern that catches everything, which could b
 case expression do
   1 -> 1
   2 -> 2
-  n -> n
+  n -> n * 2
 end
 
 case expression do
-  1 -> 1
-  2 -> 2
-  _ -> "The number is neither 1 nor 2"
+  1 -> {:ok, 1}
+  2 -> {:ok, 2}
+  _ -> {:error, "The number is neither 1 nor 2"}
 end
 ```
 
@@ -175,15 +175,15 @@ For example the following `case` can be represented with functions clauses:
 ```elixir
 def num(n) do
   case n do
-    1 -> 1
-    2 -> 2
-    _ -> "The number is neither 1 nor 2"
+    1 -> {:ok, 1}
+    2 -> {:ok, 2}
+    _ -> {:error, "The number is neither 1 nor 2"}
   end
 end
 
-def num_(1), do: 1
-def num_(2), do: 2
-def num_(_), do: "The number is neither 1 nor 2"
+def num_(1), do: {:ok, 1}
+def num_(2), do: {:ok, 2}
+def num_(_), do: {:error, "The number is neither 1 nor 2"}
 ```
 
 ### Exercises
