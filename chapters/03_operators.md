@@ -106,7 +106,7 @@ iex(1)> "hello" <> " world"
 ### Text-based match `=~` operator
 `=~` is used for regex and string matching. 
 
-`left ~= right` where the `right` is the regex pattern/string which is being matched against the `left` value. If the `right` value regex, the operator will return `true` if the regex pattern matches the string in the `left` value. If the `right` value is a string, the operator will return `true` if the `left` value contains the `right` value.
+The pattern is `left ~= right` where the `right` is the regex pattern/string which is being matched against the `left` value. If the `right` value regex, the operator will return `true` if the regex pattern matches the string in the `left` value. If the `right` value is a string, the operator will return `true` if the `left` value contains the `right` value.
 
 Regex is denoted like so: `~r/{pattern}/`
 ```elixir
@@ -476,7 +476,7 @@ iex(2)> a
 
 With lists it's not necessary to map our the whole list in order to make a pattern.
 
-If we care to match only on the first element of a list we could use the `|` operator to separate the head and the tail.
+When matching on the first element of list, the `|` (cons operator) could be used to separate the `head` from the `tail` of the list. And then doing some pattern match on the head.
 ```elixir
 iex(1)> [head | tail] = [1, 2, 3, 4]
 [1, 2, 3, 4]
@@ -492,6 +492,21 @@ iex(6)> [_, {b, _} | _] = [[1, 2], {:atom, "string"}, 3] # <-- Remember that con
 [[1, 2], {:atom, "string"}, 3]
 iex(7)> b
 :atom
+```
+
+The match operator can be used multiple times in a row. Meaning there could be multiple patterns written on the left side. 
+This is useful in situations where not only a specific nested value is necessary, but the whole value as well. 
+
+The pattern goes like so `pattern1 = pattern2 = patternN = value`.
+```elixir
+iex(1)> [head | tail] = [[_, a] | _] = [[1, 2], {:atom, "string"}, 3]
+[[1, 2], {:atom, "string"}, 3]
+iex(2)> head
+[1, 2]
+iex(3)> tail
+[{:atom, "string"}, 3]
+iex(4)> a
+2
 ```
 
 The match operator is happening not only when we use the `=` operator. When we define function the arguments are also executing a pattern match operation.
