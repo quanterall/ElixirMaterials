@@ -53,7 +53,7 @@ end
 ### Exercises
 
 1. Make a function `odd/1` that takes a number and returns `true` if the number is odd
-2. Make a function `even/1` that takes a number and returns `fales` if the number is even
+2. Make a function `even/1` that takes a number and returns `true` if the number is even
 3. Make a function `calculate/2` that takes two numbers and
    1. if both are `even` it will add them together
    2. if both are `odd` it will subtract the second from the first one
