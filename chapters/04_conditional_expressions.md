@@ -8,7 +8,7 @@
 - [With](#with)
 - [Guards](#guards)
   - [Where can guards be used?](#where-can-guards-be-used)
-  - [Defining your own guards](#defining-your-own-guards)
+  - [Defining custom guards](#defining-custom-guards)
 
 ## If
 If expressions are a little bit different in the sense that there is no `else if`. It's either true or not. The only thing you have to remember that is different from what you are probably used to is that they are actually expressions so they return a value and you have to be careful sometimes with that.
@@ -245,13 +245,12 @@ end
 ```
 
 ## Guards
-Guards are a way to provide additional binary checks to your function. Not all expressions are allowed in guard clauses. Yet they can be very helpful to _guard_ your function from being called.
+Guards are a way to add additional validations/checks that cannot be done with pattern matching. They can be used in variety of constructs where pattern matching is allowed. Guards do have some limits to them. Not all expressions are allowed within guards. Only boolean expressions are allowed. There already is a set of predefined guard clauses in the `Kernel` module that suit a lot of needs and in addition there is a way to define custom guards.
 
-This might sound confusing, so let's see an example:
+Guards are defined using the `when` keyword. Below is an example of how a guard clause can be added to a function clause. This simple guard clause will check if the passed number is an even number.
 
 ```elixir
-# If we pass an odd number the guard will fail, therefore
-# Elixir will attempt the next function in line.
+# If we pass an odd number the guard will fail, therefore Elixir will attempt the next function in line.
 def even?(num) when rem(num, 2) == 0 do
   true
 end
@@ -260,9 +259,21 @@ def even?(_) do
   false
 end
 ```
-As you can notice guards are added using the `when` clause, just before the `do`
 
-You can have multiple guards using `and` and `or`, the same way you can do in an `if` statement.
+But what if the argument that is passed is not an integer? This check will fail. 
+A way to fix this potential problem could be to add additional guard clause that will validate that the passed argument is indeed an integer.
+
+```elixir
+def even?(num) when is_integer(num) and rem(num, 2) == 0 do
+  true
+end
+
+def even?(_) do
+  false
+end
+```
+
+When multiple guards are necessary both `and` and `or` can be used to create a more complex guard validation.
 ```elixir
 def even?(num) when is_integer(num) and rem(num, 2) == 0 do
   true
@@ -282,8 +293,7 @@ end
 ```
 
 ### Where can guards be used?
-They can be used in variety of constructs. Such like `case`, `for`, `with` etc.
-You can used them in lambda functions as well. 
+In addition to using them in named functions, guards can be used in anonymous function clauses, `case` and `with` constructs.
 
 Guards in a lambda function
 ```elixir
@@ -292,7 +302,7 @@ iex(1)> my_fun = fn
 ...(1)>   num when num >= 10 and num <= 99 -> "Between 10 and 99"
 ...(1)>   num when num >= 100 and num < 999 -> "Between 100 and 999"
 ...(1)>   _ -> "More than 1000"
-...(1)>end
+...(1)> end
 ```
 
 Guards in a case expression
@@ -305,7 +315,7 @@ case number do
 end
 ```
 
-### Defining your own guards
+### Defining custom guards
 You might find yourself using the same multiple guards in multiple functions. To alleviate this issue you can create your own custom guard that will combine these checks in one single guard.
 
 ```elixir
@@ -319,7 +329,7 @@ Instead of having these 3 guards, we can combine the checks in a custom guard an
 
 ```elixir
 defmodule MyModule do
-  defguard is_even_number(value) when (is_integer(value) or is_float(value)) and rem(value, 2) == 0
+  defguard is_even_number(value) when is_number(value) and rem(value, 2) == 0
 
   def my_function(value) when is_even_number(value) do
     # do stuff
