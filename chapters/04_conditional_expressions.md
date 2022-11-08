@@ -206,9 +206,9 @@ The `with` expression is a combination of multiple nested `case` expressions. It
 
 You could write a logic like so, with 2 `case` expressions:
 ```elixir
-case condition_1 do
+case expression_1 do
   success_pattern ->
-    case condition_2 do
+    case expression_2 do
       success_pattern ->
         # do something here
       error_pattern ->
@@ -223,8 +223,8 @@ As you can see it doesn't look very clean when you nest 2 `case` expressions and
 
 We can simplify this logic using the `with` expression:
 ```elixir
-with success_pattern_1 <- condition_1,
-     success_pattern_2 <- condition_2 do
+with success_pattern_1 <- expression_1,
+     success_pattern_2 <- expression_2 do
   # do something here
 end
 ```
@@ -233,8 +233,8 @@ In the example above the `with` expression is not handling the different errors 
 
 If we'd like to alter what the `with` expression is going to return for each of those errors, we can add an `else` clause:
 ```elixir
-with success_pattern_1 <- condition_1,
-     success_pattern_2 <- condition_2 do
+with success_pattern_1 <- expression_1,
+     success_pattern_2 <- expression_2 do
   # do something here
 else
   error_pattern_1 ->
@@ -320,16 +320,16 @@ You might find yourself using the same multiple guards in multiple functions. To
 
 ```elixir
 defmodule MyModule do
-  def my_function(number) when (is_integer(number) or is_float(number)) and rem(number, 2) == 0 do
+  def my_function(arg) when is_integer(arg) and rem(arg, 2) == 0 do
     # do stuff
   end
 end
 ```
-Instead of having these 3 guards, we can combine the checks in a custom guard and use it instead
+Instead of having these 2 guards, we can combine the checks in a custom guard and use it instead
 
 ```elixir
 defmodule MyModule do
-  defguard is_even_number(value) when is_number(value) and rem(value, 2) == 0
+  defguard is_even_number(value) when is_integer(value) and rem(value, 2) == 0
 
   def my_function(value) when is_even_number(value) do
     # do stuff
