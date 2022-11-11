@@ -173,7 +173,7 @@ There are few ways to access elements in a keyword list, but there is one thing 
     iex(2)> func("hello")
     'h'
     iex(3)> func("hello", upper: true, repeat: 3)
-    'HHH'
+    "HHH"
     ```
     
 ## Maps
