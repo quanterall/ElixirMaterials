@@ -169,11 +169,11 @@ There are few ways to access elements in a keyword list, but there is one thing 
 2. To the previous function, add a new option called `:repeat` that would specify how many times to repeat the first letter.
     ```elixir
     iex(1)> func("hello", repeat: 3)
-    "hhh"
+    'hhh'
     iex(2)> func("hello")
     'h'
     iex(3)> func("hello", upper: true, repeat: 3)
-    "HHH"
+    'HHH'
     ```
     
 ## Maps
