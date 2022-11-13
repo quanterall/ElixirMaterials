@@ -5,8 +5,14 @@
     - [The :uniq option](#the-uniq-option)
     - [The :into option](#the-into-option)
     - [The :reduce option](#the-reduce-option)
-    - [Why to avoid the `for` comprehension](#why-to-avoid-the-for-comprehension)
     - [Exercises](#exercises)
+  - [List comprehension alternatives](#list-comprehension-alternatives)
+    - [Enum.map/2](#enummap2)
+    - [Enum.filter/2](#enumfilter2)
+    - [Enum.reduce/3](#enumreduce3)
+    - [Enum.each/2](#enumeach2)
+    - [Exercises](#exercises-1)
+  - [Why to avoid the `for` comprehension](#why-to-avoid-the-for-comprehension)
 
 # Working with lists
 
@@ -182,19 +188,111 @@ iex>   acc -> Map.update(acc, key, value, &(if &1 > value do &1 else value end))
 iex> end
 ```
 
-
-### Why to avoid the `for` comprehension
-The list comprehension in Elixir is a very powerful tool that can be used in variety of situations. It is basically a "jack of all trades", but that is it's drawback. When looking at a list comprehension implementation, while it may look cool, you might not be able to instantly understand what it is supposed to do. Maybe it's supposed to map over a list of values or maybe it is doing so, while filtering out some other values. It's the ambiguity that is not favored.
-
-So what is the alternative? Pretty simple. Just use the function from the `Enum` module. Listing a few as example:
-- `Enum.map` when there is a need to map over a list of values. 
-- `Enum.filter` when there is a need to filter out some unneeded values.
-- `Enum.reduce` when there is a need to reduce over a list of values to produce an accumulated result.
-- `Enum.each` when you want to just call some logic for each of the values in the list, but no return value is needed.
-- `Enum.uniq` when you need all the uniq values of a list.
-
-**WARNING** Take this with a grain of salt. At the end it is just an opinion. What is important to remember is to try to use the approach of the team you are working in. Don't spill here and there list comprehension just because you like them. Alternatively if everyone on the team is comfortable with them, go ahead. Although, personally I would advice against that.
-
 ### Exercises
 1. Write a list comprehension that when provided a list of values will return a list containing only the numbers. 
-   Example: input: `[1, "2", :atom, 5]` output: `[1, 5]`
+  Example: input: `[1, "2", :atom, 5]` output: `[1, 5]`
+2. Create a Scrabble scoring system. Given a list of two elements sized tuples, where the first element is a player name and the second is the list of all his words, calculate who is the player with most points, hence the winner.
+  The scoring is as follows:
+  ```
+  0 Points - Blank tile.
+  1 Point - A, E, I, L, N, O, R, S, T and U.
+  2 Points - D and G.
+  3 Points - B, C, M and P.
+  4 Points - F, H, V, W and Y.
+  5 Points - K.
+  8 Points - J and X.
+  10 Points - Q and Z.
+  ```
+3. Create a function that determines whether a provided sentence is a [pangram](https://en.wikipedia.org/wiki/Pangram).
+  ```elixir
+  iex> pangram?("The quick brown fox jumps over the lazy dog")
+  true
+  iex> pangram?("hello world")
+  false
+  ```
+4. Create a function that takes a string and return an encrypted version of that string using the [ROT13](https://en.wikipedia.org/wiki/ROT13) rotation cypher.
+  ```elixir
+  iex> encrypt("hello world")
+  "uryyb jbeyq"
+  iex> encrypt("(hello, world?!)")
+  "(uryyb, jbeyq?!)"
+  ```
+5. Create a function that takes a string and a rotation cypher as a second parameter where the cypher can be `ROT` + `<key>`, where `<key>` can range from `1` to `25` (basically denoting what is the offset of the substitution letter).
+
+**Notes**
+- Validate your `ROT-13` algorithm [here](https://rot13.com/)
+
+## List comprehension alternatives
+Most often than not you'll see function from the Enum module used instead of the `for` comprehension. While the `for` comprehension is capable of all these functionalities, its scope is too broad. In contrast each function of the Enum module has a very specific use case.
+
+### Enum.map/2
+`Enum.map/2` is a mapping function for applying a function over each element in an enumerable.
+
+```elixir
+iex> Enum.map(1..10, &(&1 + 1))
+[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+```
+
+`Enum.map/2` shines with its clear behavior and predictable output. 
+
+### Enum.filter/2
+`Enum.filter/2` is a filtering function, that applies a conditional function over each element, if the condition produces false, the element will be filtered out of the enumerable.
+
+```elixir
+iex> Enum.filter(1..10, &(rem(&1, 2) == 0))
+[2, 4, 6, 8, 10]
+```
+
+
+Similar to `Enum.map/2`, `Enum.filter/2` has a predictable outcome and is very clear in its intentions.
+
+### Enum.reduce/3
+`Enum.reduce/3` is a function that takes an enumerable, initial state and a reducer function, iterates through each element in the enumerable and produces a final state as a result. On each iteration, the given function will take the current value and current state and return the new state for the next iteration.
+
+A reducer is a pure function that takes the current state, an element and an action and returns the next state.
+
+```elixir
+iex> Enum.reduce(1..10, 0, fn number, accumulator -> number + accumulator end)
+55
+```
+
+A shorter version would be
+```elixir
+iex> Enum.reduce(1..10, 0, &(&1 + &2))
+55
+```
+
+There is an `Enum.reduce/2` version of the function, that does not take a starting value for the accumulator. It uses the first element of the provided enumerable as its initial value, which means that the iteration starts from the second element.
+```elixir
+iex> Enum.reduce(1..10, &(&1 + &2))
+55
+```
+
+While `Enum.reduce/3` might require a little bit more to grasp, it has clear use cases and provides just the necessary elements to fulfil them.
+
+### Enum.each/2
+`Enum.each/2` is an iterative function over an enumerable, that does not produce a result out of the function application. It always returns the atom `:ok` to represent the end of its execution. It is primarily used to execute some action for each element, where there is no output.
+
+```elixir
+iex> Enum.each(1..10, &IO.inspect/1)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+:ok
+```
+
+`Enum.each/2` is a very simple function with predictable outcome and clear use case.
+
+### Exercises
+
+Redo all exercises from the list comprehension section, but this time use only function from the Enum module when (ie `Enum.map/2`, `Enum.filter/2`, `Enum.reduce/3`, etc.)
+
+## Why to avoid the `for` comprehension
+The `for` comprehension is a "jack of all trades". It can be used in almost any scenario and while that might sound as an upside, in reality it might even be a downside. This means that when you come across a `for` comprehension in a codebase you don't have an immediate understanding of what it's doing. In contrast, all function from the `Enum` module that are used as alternatives have a very specific use case and generally give some idea of what is happening. Generally it is a good idea to go for functions from the `Enum` module. There might be an argument that in some situations the `for` comprehension is more elegant, but I believe those are rare.
