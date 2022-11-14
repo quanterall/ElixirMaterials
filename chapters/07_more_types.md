@@ -300,16 +300,16 @@ Modifying Maps can happen in a two ways.
    ```
    2. Function for moving an employee from one department to another
    ```elixir
-    iex> move(<company-representation>, "Peter", "sales") # Moving "Peter" to the "sales" department
+    iex> move(<company-representation>, "Peter Smith", "sales") # Moving "Peter Smith" to the "sales" department
    ```
    3. Function for pulling all employees from a specific department whose salary is in specified range
    ```elixir
     iex> employees_with_salary_in(<company-representation>, "sales", 2000, 3000)
-    iex> # All employees from "sales" with salary between 2000-3000
+    # All employees from "sales" with salary between 2000-3000
    ```
    4. Function for firing an employee based on their name.
    ```elixir
-    iex> fire(<company-representation>, "Peter") # From now on "Peter" is no longer in the company
+    iex> fire(<company-representation>, "Peter Smith") # From now on "Peter Smith" is no longer in the company
    ```
 
 ## Struct 
