@@ -293,12 +293,11 @@ Modifying Maps can happen in a two ways.
    4. Department _out of: ["sales", "IT", "operations", "marketing"]
    5. Years of experience
    6. Salary
-    Write the following helping function
-    1. Function for promoting employees with salaries under specified amount
-    2. Function for moving an employee from one department to another
-    3. Function for pulling all employees from a specific department which salary is in specified range
-    4. Function for firing an employee based on their name.
-
+2. Write the following helping function
+   1. Function for promoting employees with salaries under specified amount
+   2. Function for moving an employee from one department to another
+   3. Function for pulling all employees from a specific department which salary is in specified range
+   4. Function for firing an employee based on their name.
 
 ## Struct 
 Struct is an extension built on top of `Map` that provides compile-time checks and default values. When creating a Struct a set of keys are defined which are the only attributes this Struct can have. `Struct`s are perfect for scenarios where only a specific set of keys are necessary.
