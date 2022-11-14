@@ -298,9 +298,19 @@ Modifying Maps can happen in a two ways.
    ```elixir
     iex> promote(<company-representation>, 3000, 5000) # all employees with salaries <= 3000 are promoted to 5000
    ```
-   1. Function for moving an employee from one department to another
-   2. Function for pulling all employees from a specific department which salary is in specified range
-   3. Function for firing an employee based on their name.
+   2. Function for moving an employee from one department to another
+   ```elixir
+    iex> move(<company-representation>, "Peter", "sales") # Moving "Peter" to the "sales" department
+   ```
+   3. Function for pulling all employees from a specific department whose salary is in specified range
+   ```elixir
+    iex> employees_with_salary_in(<company-representation>, "sales", 2000, 3000)
+    iex> # All employees from "sales" with salary between 2000-3000
+   ```
+   4. Function for firing an employee based on their name.
+   ```elixir
+    iex> fire(<company-representation>, "Peter") # From now on "Peter" is no longer in the company
+   ```
 
 ## Struct 
 Struct is an extension built on top of `Map` that provides compile-time checks and default values. When creating a Struct a set of keys are defined which are the only attributes this Struct can have. `Struct`s are perfect for scenarios where only a specific set of keys are necessary.
