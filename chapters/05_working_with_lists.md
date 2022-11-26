@@ -55,7 +55,9 @@ iex> for n <- 1..10, do: n ** 2 # <- Return all numbers from 1 to 10 to the powe
 
 List expressions can be nested into each other to perform nested iterations on multiple collections.
 ```elixir
-iex> for x <- [1, 2], y <- [3, 4], do: x * y
+iex> for x <- [1, 2], y <- [3, 4] do
+iex>   x * y
+iex> end
 [3, 4, 6, 8]
 ```
 
@@ -63,13 +65,17 @@ iex> for x <- [1, 2], y <- [3, 4], do: x * y
 
 Filters in list comprehensions can be used to filter out / remove a value from the iteration and they are written before the `do` keyword. They must evaluate to `truthy` values (everything except `nil` or `false`). If the filter produces a `falsy` value, the current element is discarded.
 ```elixir
-iex> for n <- [1, 2, 3, 4], rem(n, 2) == 0, do: n
+iex> for n <- [1, 2, 3, 4], rem(n, 2) == 0 do 
+iex>   n
+iex> end
 [2, 4]
 ```
 
 More than one filter can be declared, where each filter is separated by a comma.
 ```elixir
-iex> for n <- [1, "string", 2, :atom, 3, 4], is_integer(n), rem(n, 2) == 0, do: n
+iex> for n <- [1, "string", 2, :atom, 3, 4], is_integer(n), rem(n, 2) == 0 do
+iex>   n
+iex> end
 [2, 4]
 ```
 
@@ -77,15 +83,21 @@ When working with nested list comprehensions, filters can either be written at t
 
 Here both list expressions are valid in terms of syntax.
 ```elixir
-iex> for x <- [1, 2, 3, 4, :five], y <- [:one, 10, 20], is_integer(x), is_integer(y), do: x * y
+iex> for x <- [1, 2, 3, 4, :five], y <- [:one, 10, 20], is_integer(x), is_integer(y) do
+iex>   x * y
+iex> end
 [10, 20, 20, 40, 30, 60, 40, 80]
-iex> for x <- [1, 2, 3, 4, :five], is_integer(x), y <- [:one, 10, 20], is_integer(y), do: x * y
+iex> for x <- [1, 2, 3, 4, :five], is_integer(x), y <- [:one, 10, 20], is_integer(y) do
+iex>   x * y
+iex> end
 [10, 20, 20, 40, 30, 60, 40, 80]
 ```
 
 `Guard` clauses can also be used in conjunction with filters
 ```elixir
-iex> for n when is_integer(n) <- [:zero, 1, 2, 3, 4, 5], rem(n, 2), do: n ** 2
+iex> for n when is_integer(n) <- [:zero, 1, 2, 3, 4, 5], rem(n, 2) do
+iex>   n ** 2
+iex> end
 [1, 4, 9, 16, 25]
 ```
 
@@ -103,7 +115,9 @@ Results from filters can be assigned to variables which can then be used in the 
 In the example below the construction is of the pattern `{child, parent}`
 ```elixir
 iex> family_tree = [{:"John junior", :"John"}, {:"Mia", :"John"}, {:"John", :"John senior"}, {:"John senior", nil}]
-iex> for {child, parent} <- family_tree, grandparent = family_tree[parent], do: {child, grandparent}
+iex> for {child, parent} <- family_tree, grandparent = family_tree[parent] do
+iex>  {child, grandparent}
+iex> end
 ["John junior": :"John senior", Mia: :"John senior"]
 ```
 
@@ -124,11 +138,12 @@ iex> end
 ```
 
 ### The :uniq option
-<!-- With the `:uniq` option, the list comprehension can filter out unique values. -->
 The `:uniq` option can be used to discard repeating values
 
 ```elixir
-iex> for n <- [1, 2, 2, 1, 3, 4, 4], uniq: true, do: n * 2
+iex> for n <- [1, 2, 2, 1, 3, 4, 4], uniq: true do
+iex>   n * 2
+iex> end
 [2, 4, 6, 8]
 ```
 
@@ -137,7 +152,9 @@ The `:into` option can be used to change the resulting collection. By default, t
 
 An example would be to construct a single string out of list of strings. This is not particularly good since the result has a hanging space at the end.
 ```elixir
-iex> for word <- ["apple", "strawberry", "kiwi", "banana"], into: "", do: "#{word} "
+iex> for word <- ["apple", "strawberry", "kiwi", "banana"], into: "" do
+iex>   "#{word} "
+iex> end
 "apple strawberry kiwi banana "
 ```
 
@@ -155,14 +172,13 @@ iex> multiplication_table[{7, 5}]
 Bear in mind that if the keys are repeating and they overlap, the last value will be the one that is stored in the resulting map.
 
 ```elixir
-iex> for {key, value} <- [{1, 10}, {2, 200}, {3, 30}, {1, 100}, {2, 20}], into: %{}, do: {key, value}
+iex> for {key, value} <- [{1, 10}, {2, 200}, {3, 30}, {1, 100}, {2, 20}], into: %{} do
+iex>   {key, value}
+iex> end
 %{1 => 100, 2 => 20, 3 => 30}
 ```
 
 ### The :reduce option
-
-<!-- When using the `:into` option to construct a map, there is this caveat that when there are repeating keys, the last of them is going to be the one used in the resulting map at the end of the list comprehension. The `:reduce` option allows the developer to custom tailor which keys are being added. -->
-
 With the `:reduce` option, you specify an initial accumulator value, which is potentially updated on each iteration of the list comprehension. The initial value of the accumulator can be of any type. Through each iteration, the list comprehension provides access to the current value of the accumulator. The result of the `do` block is going to be the new value of the accumulator for the next iteration.
 
 The syntax is the following: 
@@ -171,12 +187,12 @@ for <value> <- <enumerable>, reduce: <initial-accumulator> do
   <current-accumulator> -> <new-accumulator>
 end
 ```
-**NB** When using the `:reduce` option, the short version of the list comprehension `, do:` is not allowed.
 
-
-A simple example
+An example of using the accumulation would be to get the total sum of all numbers in a list.
 ```elixir
-iex> for n <- [1, 2, 3, 4, 5], reduce: 0 do acc -> acc + n end
+iex> for n <- [1, 2, 3, 4, 5], reduce: 0 do 
+iex>   acc -> acc + n 
+iex> end
 15
 ```
 
@@ -191,7 +207,7 @@ iex> end
 ### Exercises
 1. Write a list comprehension that when provided a list of values will return a list containing only the numbers. 
   Example: input: `[1, "2", :atom, 5]` output: `[1, 5]`
-2. Create a Scrabble scoring system. Given a list of two elements sized tuples, where the first element is a player name and the second is the list of all his words, calculate who is the player with most points, hence the winner.
+1. Create a Scrabble scoring system. Create a structure that holds player names and all their words they have accumulated throughout the game. Decide what structure you will use to represent the players and their words. Based on their words, calculate which of the players is the winner.
   The scoring is as follows:
   ```
   0 Points - Blank tile.
@@ -203,21 +219,21 @@ iex> end
   8 Points - J and X.
   10 Points - Q and Z.
   ```
-3. Create a function that determines whether a provided sentence is a [pangram](https://en.wikipedia.org/wiki/Pangram).
+1. Create a function that determines whether a provided sentence is a [pangram](https://en.wikipedia.org/wiki/Pangram).
   ```elixir
   iex> pangram?("The quick brown fox jumps over the lazy dog")
   true
   iex> pangram?("hello world")
   false
   ```
-4. Create a function that takes a string and return an encrypted version of that string using the [ROT13](https://en.wikipedia.org/wiki/ROT13) rotation cypher.
+1. Create a function that takes a string and return an encrypted version of that string using the [ROT13](https://en.wikipedia.org/wiki/ROT13) rotation cypher.
   ```elixir
   iex> encrypt("hello world")
   "uryyb jbeyq"
   iex> encrypt("(hello, world?!)")
   "(uryyb, jbeyq?!)"
   ```
-5. Create a function that takes a string and a rotation cypher as a second parameter where the cypher can be `ROT` + `<key>`, where `<key>` can range from `1` to `25` (basically denoting what is the offset of the substitution letter).
+1. Create a function that takes a string and a rotation cypher as a second parameter where the cypher can be `ROT` + `<key>`, where `<key>` can range from `1` to `25` (basically denoting what is the offset of the substitution letter).
 
 **Notes**
 - Validate your `ROT-13` algorithm [here](https://rot13.com/)
