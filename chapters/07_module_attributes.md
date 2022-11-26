@@ -130,7 +130,7 @@ defmodule Math do
       iex> add(1, 2)
       3
   """
-  @spec add(integer(), integer()) :: integer()
+  @spec add(number(), number()) :: number()
   def add(a, b) do
     a + b
   end
@@ -142,7 +142,7 @@ When displaying the docs of the function, the specification is now visible too
 iex> h Math.add
                               def add(a, b)                               
 
-  @spec add(integer(), integer()) :: integer()
+  @spec add(number(), number()) :: number()
 
 Adds two numbers together
 
