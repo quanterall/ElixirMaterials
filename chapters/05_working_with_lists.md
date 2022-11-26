@@ -202,12 +202,13 @@ Since the `:reduce` option gives access to the accumulator, there is a way to fi
 iex> for {key, value} <- [{1, 10}, {2, 200}, {3, 30}, {1, 100}, {2, 20}], reduce: %{} do 
 iex>   acc -> Map.update(acc, key, value, &(if &1 > value do &1 else value end))
 iex> end
+%{1 => 100, 2 => 200, 3 => 30}
 ```
 
 ### Exercises
 1. Write a list comprehension that when provided a list of values will return a list containing only the numbers. 
   Example: input: `[1, "2", :atom, 5]` output: `[1, 5]`
-1. Create a Scrabble scoring system. Create a structure that holds player names and all their words they have accumulated throughout the game. Decide what structure you will use to represent the players and their words. Based on their words, calculate which of the players is the winner.
+2. Create a Scrabble scoring system. Create a structure that holds player names and all their words they have accumulated throughout the game. Decide what structure you will use to represent the players and their words. Based on their words, calculate which of the players is the winner.
   The scoring is as follows:
   ```
   0 Points - Blank tile.
@@ -219,21 +220,21 @@ iex> end
   8 Points - J and X.
   10 Points - Q and Z.
   ```
-1. Create a function that determines whether a provided sentence is a [pangram](https://en.wikipedia.org/wiki/Pangram).
+3. Create a function that determines whether a provided sentence is a [pangram](https://en.wikipedia.org/wiki/Pangram).
   ```elixir
   iex> pangram?("The quick brown fox jumps over the lazy dog")
   true
   iex> pangram?("hello world")
   false
   ```
-1. Create a function that takes a string and return an encrypted version of that string using the [ROT13](https://en.wikipedia.org/wiki/ROT13) rotation cypher.
+4. Create a function that takes a string and return an encrypted version of that string using the [ROT13](https://en.wikipedia.org/wiki/ROT13) rotation cypher.
   ```elixir
   iex> encrypt("hello world")
   "uryyb jbeyq"
   iex> encrypt("(hello, world?!)")
   "(uryyb, jbeyq?!)"
   ```
-1. Create a function that takes a string and a rotation cypher as a second parameter where the cypher can be `ROT` + `<key>`, where `<key>` can range from `1` to `25` (basically denoting what is the offset of the substitution letter).
+5. Create a function that takes a string and a rotation cypher as a second parameter where the cypher can be `ROT` + `<key>`, where `<key>` can range from `1` to `25` (basically denoting what is the offset of the substitution letter).
 
 **Notes**
 - Validate your `ROT-13` algorithm [here](https://rot13.com/)
