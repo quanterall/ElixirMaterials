@@ -195,12 +195,13 @@ iex> long_task = fn id ->
 ...>   "#{id} has finished"
 ...> end
 #Function<42.3316493/1 in :erl_eval.expr/6>
-iex> async_long_task = fn id -> 
-...>   caller = self() # <- Here we are taking the pid of the 'caller', which in our case is the shell
-...>   spawn(fn -> send(caller, {:result, long_task.(id)}) end)
+iex> async_long_task = fn (id, receiver) ->
+...>   spawn(fn -> send(receiver, {:result, long_task.(id)}) end)
 ...> end
 #Function<42.3316493/1 in :erl_eval.expr/6>
-iex> Enum.each(1..5, fn num -> async_long_task.(num) end) # <- Here we are calling `async_long_task/1` 5 times
+iex> terminal_pid = self()
+#PID<0.107.0>
+iex> Enum.each(1..5, fn num -> async_long_task.(num, terminal_pid) end) # <- Here we are calling `async_long_task/1` 5 times
 :ok # <- This means that all the tasks have been called and now we can start consuming the results
 iex> reader = fn -> # <- We'll do a utility function that calls `receive do` for ease of use
 ...>   receive do
