@@ -1,4 +1,5 @@
 - [What is a `GenServer`](#what-is-a-genserver)
+- [Starting a `GenServer`](#starting-a-genserver)
 - [Main `GenServer` callbacks](#main-genserver-callbacks)
   - [`init`](#init)
   - [`handle_call`](#handle_call)
@@ -11,6 +12,14 @@
 Working with processes is one of the main drive to use the BEAM via Elixir/Erlang. While working with processes is straight forward, there are a few aspects that overlap most of the times. So having a generic way to deal with / setup a process is really helpful. Having a generic interface to operate with processes makes for a simpler codebase with one way of doing things.d
 
 A `GenServer` process provides just that. It's a generic way to describe a process and implement all the necessary features one might need, by using the set of standard set of interface functions that the `GenServer` exposes. At it's core a `GenServer` is just an Elixir process and can be used to keep/modify state, execute synchronous/asynchronous code.
+
+## Starting a `GenServer`
+`GenServer` can be started with one of the following functions `GenServer.start/3` or `GenServer.start_link/3`. Both accept the same arguments. The difference is that `GenServer.start/3` will start the `GenServer` as a standalone process, where as `GenServer.start_link/3` will link it to the process that started it, creating a parent-child like relationship. When processes are linked together, if one fails that failure will propagate to its parent and so forth. This means that the parent will be aware that a child process has failed and have the opportunity to do something about it.
+
+`GenServer` start functions accept three parameters:
+- The first argument is the module where the `GenServer` is defined.
+- The second argument is the initial argument (state) of the `GenServer`.
+- The final argument is options, which is optional by itself. There are a few options that can be passed, but one of the most used ones is the `:name` option. It allows us to name the `GenServer`, so that we can refer to it by name instead by `pid`. A standard practice is to name the `GenServer` with the module name.
 
 ## Main `GenServer` callbacks
 There are total of 8 callbacks. This chapter is going to cover only the most used ones. The ones that you'll have to deal with most of the time while working with `GenServer`: `init`, `handle_call`, `handle_cast`, `handle_info`, `handle_continue`.
