@@ -340,8 +340,20 @@ end
    1. Request to push new elements to the stack. (The stack will be represented by the state of the `GenServer`);
    2. Request to return the current state of the Stack;
    3. Request to remove (aka pop) elements from the Stack;
-2. Create a cashing server with `GenServer`. A cashing server is supposed to execute some request and cache it's response. The next time the same request is being called, instead of making the request the server should pull the cached response from a previous call. A request to the cache server to pull some information should follow these steps:
-   1. Check if the request has already been made (basically is there a cached response of this request);
+2. Create a cashing server with `GenServer` that will pull repository for a specified user from github (_A cashing server is supposed to execute some request and cache it's response. The next time the same request is being called, instead of making the request the server should pull the cached response from a previous call._). The API needed to pull github repository information for a user is outlined [here](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository). 
+The response from github is quite large, pull only these fields: "name", "url", "private", "description"
+The functionality should follow this simple steps:
+   1. Check if the request has already been made (is there a cached response of this request);
    2. If there is a cached response, return the cached response;
    3. If there isn't a cached response (meaning this request hasn't been made before), the server should execute the request, store the response in the cache (aka. in the state of the `GenServer`) and return the response back to the caller;
+
+**Notes**
+1. To make HTTP requests you need to use a library. A good fit is [HTTPoison](https://github.com/edgurgel/httpoison). To add a dependency to your Elixir application, open `mix.exs` file and add the dependency for `httpoison` in the `deps` list. Like so:
+```elixir
+def deps do
+  [
+    {:httpoison, "~> 1.8"}
+  ]
+end
+```
 
