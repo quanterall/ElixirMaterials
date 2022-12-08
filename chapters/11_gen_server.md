@@ -356,4 +356,5 @@ def deps do
   ]
 end
 ```
+2. In order to parse json string values is the [Jason](https://github.com/michalmuskala/jason) library. Again it needs to be added to `mix.exs`.
 
