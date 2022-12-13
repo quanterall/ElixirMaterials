@@ -82,7 +82,7 @@ defmodule Stack do
   end
 
   def push(value) do
-    GenServer.call(__MODULE__, {:push, value})
+    GenServer.cast(__MODULE__, {:push, value})
   end
 
   ## Callbacks
@@ -130,9 +130,9 @@ Now when the `GenServer` process dies, the `Supervisor` will make sure to restar
 ```elixir
 iex> MyApp.Supervisor.start_link()
 {:ok, #PID<0.261.0>}
-iex> GenServer.pop()
+iex> Stack.pop()
 :apple
-iex> GenServer.pop()
+iex> Stack.pop()
 19:52:59.703 [error] GenServer Stack terminating
 ** (FunctionClauseError) no function clause matching in Stack.handle_call/3
     (app 0.1.0) lib/app.ex:16: Stack.handle_call(:pop, {#PID<0.259.0>, [:alias | #Reference<0.4100405182.2229075971.184828>]}, [])
@@ -142,7 +142,7 @@ iex> GenServer.pop()
 Last message (from #PID<0.259.0>): :pop
 State: []
 Client #PID<0.259.0> is alive
-iex(3)> GenServer.call(Stack, :pop) # The `GenServer` has been restarted
+iex(3)> Stack.pop() # The `GenServer` has been restarted
 :apple
 ```
 
